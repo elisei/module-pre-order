@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="O2TI_PreOrder::preorder" 
+             title="Pre Orders" 
+             module="O2TI_PreOrder" 
+             sortOrder="100" 
+             parent="Magento_Sales::sales" 
+             action="preorder/order/index" 
+             resource="O2TI_PreOrder::preorder"/>
+    </menu>
+</config>

@@ -1,0 +1,35 @@
+<?php
+
+use O2TI\PreOrder\Block\Quote\Email\Items;
+
+/** @var $block \O2TI\PreOrder\Block\Quote\Email\Items */
+?>
+<?php $quote = $block->getQuote() ?>
+<?php if ($quote): ?>
+    <?php $items = $quote->getAllItems(); ?>
+    <table class="email-items">
+        <thead>
+            <tr>
+                <th class="item-info">
+                    <?= $block->escapeHtml(__('Items')) ?>
+                </th>
+                <th class="item-qty">
+                    <?= $block->escapeHtml(__('Qty')) ?>
+                </th>
+                <th class="item-price">
+                    <?= $block->escapeHtml(__('Price')) ?>
+                </th>
+            </tr>
+        </thead>
+        <?php foreach ($items as $item): ?>
+            <?php if (!$item->getParentItem()): ?>
+                <tbody>
+                    <?= $block->getItemHtml($item) ?>
+                </tbody>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <tfoot class="order-totals">
+            <?= $block->getChildHtml('order_totals') ?>
+        </tfoot>
+    </table>
+<?php endif; ?>

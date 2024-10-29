@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!-- 
+/**
+ * O2TI PagBank and ClearSales.
+ *
+ * Copyright © 2023 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="O2TI_PreOrder" setup_version="100.0.4">
+        <sequence>
+            <module name="PagBank_PaymentMagento"/>
+            <module name="Magento_Customer"/>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Backend"/>
+        </sequence>
+    </module>
+</config>

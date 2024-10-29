@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="adminhtml_sales_order_create_process_data_before">
+        <observer name="preorder_save_customer" instance="O2TI\PreOrder\Observer\SaveCustomerBeforeClose" />
+    </event>
+</config>

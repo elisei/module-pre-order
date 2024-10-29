@@ -1,0 +1,17 @@
+<?php
+/** @var \O2TI\PreOrder\Block\EmailQuote $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+
+// Obtém a URL do email quote
+$emailQuoteUrl = $block->getEmailQuoteUrl();
+
+// Prepara o script com a função emailQuote.init()
+$scriptString = <<<SCRIPT
+    require(["O2TI_PreOrder/js/email-quote"], function(emailQuote){
+        emailQuote.init('{$block->escapeJs($emailQuoteUrl)}');
+    });
+SCRIPT;
+
+// Renderiza o script com segurança usando o SecureHtmlRenderer
+echo $secureRenderer->renderTag('script', [], $scriptString, false);
+?>

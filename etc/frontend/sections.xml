@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Customer:etc/sections.xsd">
+    <action name="preorder/index/quote">
+        <section name="cart"/>
+        <section name="checkout-data"/>
+        <section name="directory-data"/>
+        <section name="customer"/>
+        <section name="messages"/>
+        <section name="bundle-sections"/>
+        <section name="shipping-data"/>
+        <section name="tax-data"/>
+        <section name="totals"/>
+        <section name="checkout-fields"/>
+    </action>
+</config>

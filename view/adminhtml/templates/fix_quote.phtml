@@ -1,0 +1,14 @@
+<?php
+/** @var \O2TI\PreOrder\Block\FixQuoteId $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+
+$quoteId = $block->getQuoteId();
+
+$scriptString = <<<SCRIPT
+    require(["O2TI_PreOrder/js/fix-quote-id"], function(fixQuoteId){
+        fixQuoteId.init('{$block->escapeJs($quoteId)}');
+    });
+SCRIPT;
+
+echo $secureRenderer->renderTag('script', [], $scriptString, false);
+?>

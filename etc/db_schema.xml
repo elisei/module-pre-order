@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * O2TI PreOrder Module.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Seu Nome <seuemail@exemplo.com>
+ * @license   See LICENSE for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="pre_order" resource="default">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" padding="12" comment="Entity ID"/>
+        <column xsi:type="int" name="customer_id" nullable="true" comment="Customer ID"/>
+        <column xsi:type="int" name="quote_id" nullable="true" comment="Quote Id"/>
+        <column xsi:type="varchar" name="hash" nullable="false" length="255" comment="Hash to Pay"/>
+        <column xsi:type="varchar" name="admin" nullable="false" length="255" comment="User Admin"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+    </table>
+</schema>

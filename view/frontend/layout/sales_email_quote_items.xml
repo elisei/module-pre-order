@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd" label="Email Order Items List" design_abstraction="custom">
+    <body>
+        <block class="O2TI\PreOrder\Block\Quote\Email\Items" name="items" template="O2TI_PreOrder::email/items.phtml" cacheable="false">
+            <block class="Magento\Framework\View\Element\RendererList" name="sales.email.quote.renderers" as="renderer.list">
+                <block class="O2TI\PreOrder\Block\Adapted\Quote\Email\Items\Quote\DefaultQuote" name="sales.email.order.renderers.default" as="default" template="O2TI_PreOrder::email/items/quote/default.phtml"/>
+            </block>
+            <!-- from sales_email_item_price handle -->
+            <block class="O2TI\PreOrder\Block\Adapted\Quote\Email\Items\Quote\DefaultQuoteItemPrice" name="item_price" template="O2TI_PreOrder::email/items/quote/row.phtml"/>
+            <block class="O2TI\PreOrder\Block\Adapted\Quote\Email\Totals" name="order_totals" template="Magento_Sales::order/totals.phtml">
+                <arguments>
+                    <argument name="label_properties" xsi:type="string">colspan="2"</argument>
+                </arguments>
+                <block class="O2TI\PreOrder\Block\Adapted\Quote\Email\Items\Tax" name="tax" template="O2TI_PreOrder::email/tax.phtml">
+                    <action method="setIsPlaneMode">
+                        <argument name="value" xsi:type="string">1</argument>
+                    </action>
+                </block>
+            </block>
+        </block>
+        <block class="Magento\Framework\View\Element\Template" name="additional.product.info" template="Magento_Theme::template.phtml"/>
+    </body>
+</page>
