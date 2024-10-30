@@ -1,14 +1,14 @@
 <?php
-/** @var \O2TI\PreOrder\Block\EmailQuote $block */
-/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
-
-$emailQuoteUrl = $block->getEmailQuoteUrl();
-
-$scriptString = <<<SCRIPT
-    require(["O2TI_PreOrder/js/email-quote"], function(emailQuote){
-        emailQuote.init('{$block->escapeJs($emailQuoteUrl)}');
-    });
-SCRIPT;
-
-echo $secureRenderer->renderTag('script', [], $scriptString, false);
+/**
+ * Email Quote Template
+ *
+ * @var \O2TI\PreOrder\Block\EmailQuote $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Magento\Framework\Escaper $escaper
+ */
 ?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], '
+    require(["O2TI_PreOrder/js/email-quote"], function(emailQuote) {
+        emailQuote.init("' . $escaper->escapeJs($block->getEmailQuoteUrl()) . '");
+    });
+', false); ?>

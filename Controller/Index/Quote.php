@@ -209,7 +209,7 @@ class Quote extends Action implements CsrfAwareActionInterface
     protected function loadPreOrderAndQuote(string $hash, array &$errorMessages): MageQuote
     {
         try {
-            $preOrder = $this->preOrderRepository->getByHash($hash);
+            $preOrder = $this->preOrderRepository->getByHash((string) $hash);
             $oldQuoteId = $preOrder->getQuoteId();
             $oldQuote = $this->quoteFactory->create()->load($oldQuoteId);
 
