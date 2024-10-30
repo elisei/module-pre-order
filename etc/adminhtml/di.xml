@@ -17,4 +17,9 @@
             </argument>
         </arguments>
     </type>
+    <type name="O2TI\PreOrder\Block\Adminhtml\Form\Field\Column\FieldColumn">
+        <arguments>
+            <argument name="userCollectionFactory" xsi:type="object">Magento\User\Model\ResourceModel\User\CollectionFactory</argument>
+        </arguments>
+    </type>
 </config>

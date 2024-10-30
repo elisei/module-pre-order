@@ -10,7 +10,7 @@
  */
  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="O2TI_PreOrder" setup_version="100.0.4">
+    <module name="O2TI_PreOrder" setup_version="100.0.5">
         <sequence>
             <module name="PagBank_PaymentMagento"/>
             <module name="Magento_Customer"/>

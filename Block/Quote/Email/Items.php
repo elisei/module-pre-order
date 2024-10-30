@@ -30,12 +30,12 @@ class Items extends AbstractItems
     /**
      * @var CartRepositoryInterface|mixed|null
      */
-    private ?CartRepositoryInterface $cartRepository;
+    private $cartRepository;
 
     /**
      * @var LoggerInterface
      */
-    private LoggerInterface $logger;
+    private $logger;
 
     /**
      * Items Constructor

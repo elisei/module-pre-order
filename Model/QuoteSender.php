@@ -20,49 +20,75 @@ use Psr\Log\LoggerInterface;
 use Throwable;
 use Magento\Store\Model\App\Emulation;
 use Magento\Framework\UrlInterface;
+use Magento\Store\Model\ScopeInterface;
 
 /**
- * Class QuoteNotifier
- *
- * @package O2TI\PreOrder\Model
+ * Class QuoteSender - Handles email sending for quotes
  */
 class QuoteSender
 {
-    const EMAIL_TEMPLATE_CONFIG_PATH = 'quote_email/quote/template';
-    const EMAIL_SENDER_CONFIG_PATH = 'quote_email/quote/email_identity';
+    /**
+     * Configuration path for template
+     */
+    public const EMAIL_TEMPLATE_CONFIG_PATH = 'preorder/quote/template';
 
-    /** @var LoggerInterface */
+    /**
+     * Configuration path for email identity
+     */
+    public const EMAIL_SENDER_CONFIG_PATH = 'preorder/quote/email_identity';
+
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
-    /** @var ScopeConfigInterface */
+    /**
+     * @var ScopeConfigInterface
+     */
     private $scopeConfig;
 
-    /** @var SenderResolverInterface */
+    /**
+     * @var SenderResolverInterface
+     */
     private $senderResolver;
 
-    /** @var TimezoneInterface */
+    /**
+     * @var TimezoneInterface
+     */
     private $timezone;
 
-    /** @var Config */
+    /**
+     * @var Config
+     */
     private $addressConfig;
 
-    /** @var Data */
+    /**
+     * @var Data
+     */
     private $paymentHelper;
 
-    /** @var SendMail */
+    /**
+     * @var SendMail
+     */
     private $sendMail;
 
-    /** @var StoreManagerInterface */
+    /**
+     * @var StoreManagerInterface
+     */
     private $storeManager;
 
-    /** @var Emulation */
+    /**
+     * @var Emulation
+     */
     private $emulation;
 
-    /** @var UrlInterface */
+    /**
+     * @var UrlInterface
+     */
     private $frontendUrlBuilder;
 
     /**
-     * QuoteSender constructor.
+     * QuoteSender constructor
      *
      * @param LoggerInterface $logger
      * @param ScopeConfigInterface $scopeConfig
@@ -100,92 +126,89 @@ class QuoteSender
     }
 
     /**
-     * Function: send
+     * Send quote email
      *
      * @param Quote $quote
-     * @param String $hash
+     * @param string $hash
+     * @param string|null $tracking
      *
+     * @return void
      * @throws MailException
      * @throws LocalizedException
      * @throws Exception
      */
-    public function send(Quote $quote, $hash)
+    public function send(Quote $quote, string $hash, ?string $tracking = null): void
     {
-        $templateId = $this->scopeConfig->getValue(self::EMAIL_TEMPLATE_CONFIG_PATH);
-        $email = $quote->getCustomerEmail();
+        try {
+            if (empty($quote->getCustomerEmail())) {
+                throw new LocalizedException(__('Customer email is not set'));
+            }
 
-        /** @var array $from */
-        $from = $this->senderResolver->resolve(
-            $this->scopeConfig->getValue(self::EMAIL_SENDER_CONFIG_PATH)
-        );
+            $storeId = $quote->getStoreId();
+            $templateId = $this->getEmailTemplate($storeId);
+            $from = $this->getSenderInfo($storeId);
+            $email = $quote->getCustomerEmail();
+            $templateVars = $this->getTemplateVars($quote, $hash, $tracking);
 
-        $templateVars = $this->getTemplateVars($quote, $hash);
-
-        // send email to customer
-        $this->sendMail->send($templateId, $quote, $templateVars, $from, $email);
-
-        // send email to customer service
-        if ($copyToEmail = $this->scopeConfig->getValue('sales_email/order/copy_to')) {
-            $this->sendMail->sendCopyTo($templateId, $quote, $templateVars, $from, $copyToEmail);
+            $this->sendMail->send($templateId, $quote, $templateVars, $from, $email);
+            $this->sendCopyEmail($templateId, $quote, $templateVars, $from, $storeId);
+        } catch (Exception $e) {
+            $this->logError($e, $quote);
+            throw new MailException(__('Failed to send email: %1', $e->getMessage()));
         }
     }
 
     /**
-     * Function: getFormattedDateFromDateTimeString
+     * Format date from datetime string
      *
      * @param string $date
-     *
      * @return string
      */
-    private function getFormattedDateFromDateTimeString(string $date)
+    private function formatDateTime(string $date): string
     {
         $timeZone = new DateTimeZone($this->timezone->getConfigTimezone());
-        return DateTime::createFromFormat('Y-m-d H:i:s', $date)->setTimezone($timeZone)->format('M jS, Y g:i:sa T');
+        return DateTime::createFromFormat('Y-m-d H:i:s', $date)
+            ->setTimezone($timeZone)
+            ->format('M jS, Y g:i:sa T');
     }
 
     /**
-     * Function: getCustomerNote
+     * Get customer note if notification is enabled
      *
      * @param Quote $quote
-     *
-     * @return mixed|string|null
+     * @return string
      */
-    private function getCustomerNote(Quote $quote)
+    private function getCustomerNote(Quote $quote): string
     {
         if ($quote->getCustomerNoteNotify()) {
-            return $quote->getCustomerNote();
+            return (string)$quote->getCustomerNote();
         }
         return '';
     }
 
     /**
-     * Function: getFormattedAddress
+     * Format address according to type
      *
      * @param Address $address
      * @param string $type
-     *
      * @return string|null
      */
-    private function getFormattedAddress(Address $address, $type)
+    private function formatAddress(Address $address, string $type): ?string
     {
         $formatType = $this->addressConfig->getFormatByCode($type);
-
-        if (! $address->getFirstname()) {
+        if (!$address->getFirstname()) {
             $address->setFirstname(' ');
         }
-        /** @noinspection PhpUndefinedMethodInspection */
         return $formatType->getRenderer()->renderArray($address->getData());
     }
 
     /**
-     * Get payment info block as html
+     * Get payment info as HTML
      *
      * @param Quote $quote
-     *
      * @return string
-     * @throws Exception
      */
-    private function getPaymentHtml(Quote $quote)
+    private function getPaymentHtml(Quote $quote): string
     {
         try {
             return $this->paymentHelper->getInfoBlockHtml(
@@ -201,15 +224,15 @@ class QuoteSender
     }
 
     /**
-     * Function: getTemplateVars
+     * Get template variables
      *
      * @param Quote $quote
-     * @param String $hash
-     *
+     * @param string $hash
+     * @param string|null $tracking
      * @return array
      * @throws Exception
      */
-    private function getTemplateVars(Quote $quote, $hash)
+    private function getTemplateVars(Quote $quote, string $hash, ?string $tracking = null): array
     {
         $this->emulation->startEnvironmentEmulation(
             $quote->getStoreId(),
@@ -219,32 +242,136 @@ class QuoteSender
 
         try {
             $store = $this->storeManager->getStore($quote->getStoreId());
-
+            $data = [
+                '_secure' => true,
+                '_nosid' => true,
+                'hash' => $hash,
+            ];
+            if ($tracking) {
+                $data['affiliate_code'] = $tracking;
+            }
+            
             $linkPay = $this->frontendUrlBuilder->setScope($quote->getStoreId())
-                ->getUrl('preorder/index/quote', [
-                    '_secure' => true,
-                    '_nosid' => true,
-                    'hash' => $hash
-                ]);
+                ->getUrl('preorder/index/quote', $data);
 
-            $templateVars = [
+            return [
                 'quote_id' => $quote->getId(),
-                'quote_updated_at' => $this->getFormattedDateFromDateTimeString($quote->getUpdatedAt()),
+                'quote_updated_at' => $this->formatDateTime($quote->getUpdatedAt()),
                 'quote_comment' => $this->getCustomerNote($quote),
                 'quote_show_shipping_address' => !$quote->getIsVirtual(),
-                'quote_shipping_address' => $this->getFormattedAddress($quote->getShippingAddress(), 'html'),
-                'quote_billing_address' => $this->getFormattedAddress($quote->getBillingAddress(), 'html'),
+                'quote_shipping_address' => $this->formatAddress($quote->getShippingAddress(), 'html'),
+                'quote_billing_address' => $this->formatAddress($quote->getBillingAddress(), 'html'),
                 'quote_is_not_virtual' => !$quote->getIsVirtual(),
                 'quote_shipping_method' => $quote->getShippingAddress()->getShippingMethod(),
                 'quote_shipping_description' => $quote->getShippingAddress()->getShippingDescription(),
                 'quote_payment_html' => $this->getPaymentHtml($quote),
                 'payment_url' => $linkPay
             ];
-
-            return $templateVars;
         } finally {
-            // Make sure we always stop the emulation
             $this->emulation->stopEnvironmentEmulation();
         }
+    }
+
+    /**
+     * Get email template ID
+     *
+     * @param int $storeId
+     * @return string
+     * @throws LocalizedException
+     */
+    private function getEmailTemplate(int $storeId): string
+    {
+        $templateId = $this->scopeConfig->getValue(
+            self::EMAIL_TEMPLATE_CONFIG_PATH,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if (empty($templateId)) {
+            throw new LocalizedException(__('Email template is not configured'));
+        }
+
+        return $templateId;
+    }
+
+    /**
+     * Get sender information
+     *
+     * @param int $storeId
+     * @return array
+     * @throws LocalizedException
+     */
+    private function getSenderInfo(int $storeId): array
+    {
+        $sender = $this->scopeConfig->getValue(
+            self::EMAIL_SENDER_CONFIG_PATH,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        ) ?: 'general';
+
+        try {
+            $from = $this->senderResolver->resolve($sender, $storeId);
+        } catch (Exception $e) {
+            $this->logger->error('Failed to resolve sender: ' . $e->getMessage(), [
+                'sender' => $sender,
+                'store_id' => $storeId
+            ]);
+            $from = $this->senderResolver->resolve('general', $storeId);
+        }
+
+        if (empty($from) || empty($from['email']) || empty($from['name'])) {
+            throw new LocalizedException(
+                __('Invalid sender data. Please configure store email settings.')
+            );
+        }
+
+        return $from;
+    }
+
+    /**
+     * Send copy email if configured
+     *
+     * @param string $templateId
+     * @param Quote $quote
+     * @param array $templateVars
+     * @param array $from
+     * @param int $storeId
+     * @return void
+     * @throws LocalizedException
+     * @throws MailException
+     */
+    private function sendCopyEmail(
+        string $templateId,
+        Quote $quote,
+        array $templateVars,
+        array $from,
+        int $storeId
+    ): void {
+        $copyToEmail = $this->scopeConfig->getValue(
+            'preorder/quote/copy_to',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if (!empty($copyToEmail)) {
+            $this->sendMail->sendCopyTo($templateId, $quote, $templateVars, $from, $copyToEmail);
+        }
+    }
+
+    /**
+     * Log error information
+     *
+     * @param Exception $e
+     * @param Quote $quote
+     * @return void
+     */
+    private function logError(Exception $e, Quote $quote): void
+    {
+        $this->logger->error('Error sending quote email: ' . $e->getMessage(), [
+            'quote_id' => $quote->getId(),
+            'customer_email' => $quote->getCustomerEmail(),
+            'store_id' => $quote->getStoreId(),
+            'exception' => $e
+        ]);
     }
 }

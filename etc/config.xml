@@ -1,13 +1,21 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
-        <quote_email>
+        <preorder>
+            <general>
+                <enabled>1</enabled>
+                <force_create_account>1</force_create_account>
+                <disable_referrer>1</disable_referrer>
+                <affiliate_tracking>[]</affiliate_tracking>
+            </general>
             <quote>
-                <template>sales_email_quote_template</template>
-                <guest_template>sales_email_quote_template</guest_template>
+                <enabled>1</enabled>
+                <template>preorder_quote_template</template>
+                <guest_template>preorder_quote_guest_template</guest_template>
                 <email_identity>general</email_identity>
                 <copy_method>bcc</copy_method>
             </quote>
-        </quote_email>
+        </preorder>
     </default>
 </config>

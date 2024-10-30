@@ -1,37 +1,37 @@
 <?php
-
+declare(strict_types=1);
 
 namespace O2TI\PreOrder\Block\Adapted\Quote\Email;
 
 use Magento\Directory\Model\Currency;
 use Magento\Framework\DataObject;
-use \Magento\Sales\Block\Order\Totals as OrderTotals;
-use function is_numeric;
+use Magento\Framework\View\Element\Template\Context;
+use Magento\Framework\Registry;
+use Magento\Sales\Block\Order\Totals as OrderTotals;
 
 /**
- * Class Totals
+ * Class to handle quote totals for email
  */
 class Totals extends OrderTotals
 {
-    /** @var Currency */
+    /**
+     * @var Currency
+     */
     private $currency;
 
     /**
-     * Totals constructor.
-     *
      * @param Currency $currency
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
+     * @param Context $context
+     * @param Registry $registry
      * @param array $data
      */
     public function __construct(
         Currency $currency,
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Magento\Framework\Registry $registry,
+        Context $context,
+        Registry $registry,
         array $data = []
     ) {
         $this->currency = $currency;
-        $this->_coreRegistry = $registry;
         parent::__construct($context, $registry, $data);
     }
 
@@ -46,43 +46,15 @@ class Totals extends OrderTotals
 
         $this->_totals = [];
         $this->_totals['subtotal'] = new DataObject(
-            ['code' => 'subtotal', 'value' => $source->getSubtotal(), 'label' => __('Subtotal')]
+            [
+                'code' => 'subtotal',
+                'value' => $source->getSubtotal(),
+                'label' => __('Subtotal')
+            ]
         );
 
-        /**
-         * Add shipping
-         */
-        $shippingAddress = $source->getShippingAddress();
-        if (! $source->getIsVirtual() && $shippingAddress && $shippingAddress->getShippingAmount() > 0
-            || (is_numeric($shippingAddress->getShippingAmount()) && $shippingAddress->getShippingDescription())
-        ) {
-            $this->_totals['shipping'] = new DataObject(
-                [
-                    'code' => 'shipping',
-                    'field' => 'shipping_amount',
-                    'value' => $shippingAddress->getShippingAmount(),
-                    'label' => __('Shipping & Handling'),
-                ]
-            );
-        }
-
-        /**
-         * Add discount
-         */
-        if (is_numeric($this->getSource()->getSubtotalWithDiscount())
-            && (double)$this->getSource()->getSubtotalWithDiscount() < (double)$this->getSource()->getSubtotal()) {
-            $discountLabel = __('Discount');
-
-            $this->_totals['discount'] = new DataObject(
-                [
-                    'code' => 'discount',
-                    'field' => 'discount_amount',
-                    'value' => (double)$this->getSource()->getSubtotalWithDiscount() - (double)$this->getSource()
-                            ->getSubtotal(),
-                    'label' => $discountLabel,
-                ]
-            );
-        }
+        $this->addShippingTotal();
+        $this->addDiscountTotal();
 
         $this->_totals['grand_total'] = new DataObject(
             [
@@ -90,7 +62,7 @@ class Totals extends OrderTotals
                 'field' => 'grand_total',
                 'strong' => true,
                 'value' => $source->getGrandTotal(),
-                'label' => __('Grand Total'),
+                'label' => __('Grand Total')
             ]
         );
 
@@ -98,15 +70,67 @@ class Totals extends OrderTotals
     }
 
     /**
+     * Add shipping total to totals array
+     *
+     * @return void
+     */
+    private function addShippingTotal(): void
+    {
+        $source = $this->getSource();
+        $shippingAddress = $source->getShippingAddress();
+
+        if (!$source->getIsVirtual() &&
+            $shippingAddress &&
+            ($shippingAddress->getShippingAmount() > 0 ||
+                (is_numeric($shippingAddress->getShippingAmount()) &&
+                    $shippingAddress->getShippingDescription())
+            )
+        ) {
+            $this->_totals['shipping'] = new DataObject(
+                [
+                    'code' => 'shipping',
+                    'field' => 'shipping_amount',
+                    'value' => $shippingAddress->getShippingAmount(),
+                    'label' => __('Shipping & Handling')
+                ]
+            );
+        }
+    }
+
+    /**
+     * Add discount total to totals array
+     *
+     * @return void
+     */
+    private function addDiscountTotal(): void
+    {
+        $source = $this->getSource();
+        $subtotalWithDiscount = $source->getSubtotalWithDiscount();
+        $subtotal = $source->getSubtotal();
+
+        if (is_numeric($subtotalWithDiscount) &&
+            (float)$subtotalWithDiscount < (float)$subtotal
+        ) {
+            $this->_totals['discount'] = new DataObject(
+                [
+                    'code' => 'discount',
+                    'field' => 'discount_amount',
+                    'value' => (float)$subtotalWithDiscount - (float)$subtotal,
+                    'label' => __('Discount')
+                ]
+            );
+        }
+    }
+
+    /**
      * Format total value based on order currency
      *
      * @param DataObject $total
-     *
-     * @return  string
+     * @return string
      */
-    public function formatValue($total)
+    public function formatValue($total): string
     {
-        if (! $total->getIsFormated()) {
+        if (!$total->getIsFormated()) {
             return $this->currency->format($total->getValue());
         }
         return $total->getValue();

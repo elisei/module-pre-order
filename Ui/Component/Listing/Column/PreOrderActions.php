@@ -55,13 +55,18 @@ class PreOrderActions extends Column
         if (isset($dataSource['data']['items'])) {
 
             foreach ($dataSource['data']['items'] as &$item) {
+                $data = [
+                    '_secure' => true,
+                    '_nosid' => true,
+                    'hash' => $item['hash']
+                ];
+
+                if (isset($item['tracking'])) {
+                    $data['affiliate_code'] = $item['tracking'];
+                }
 
                 $linkPay = $this->frontendUrlBuilder->setScope(0)
-                    ->getUrl('preorder/index/quote', [
-                        '_secure' => true,
-                        '_nosid' => true,
-                        'hash' => $item['hash']
-                    ]);
+                    ->getUrl('preorder/index/quote', $data);
 
                 $item[$this->getData('name')] = [
                     'view' => [

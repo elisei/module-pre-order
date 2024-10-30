@@ -41,6 +41,26 @@ class PreOrder extends AbstractModel
         return $this->getData('hash');
     }
 
+    public function setAdmin($admin)
+    {
+        return $this->setData('admin', $admin);
+    }
+
+    public function getAdmin()
+    {
+        return $this->getData('admin');
+    }
+
+    public function setTracking($tracking)
+    {
+        return $this->setData('tracking', $tracking);
+    }
+
+    public function getTracking()
+    {
+        return $this->getData('tracking');
+    }
+
     public function setCreatedAt($createdAt)
     {
         return $this->setData('created_at', $createdAt);
@@ -49,16 +69,6 @@ class PreOrder extends AbstractModel
     public function getCreatedAt()
     {
         return $this->getData('created_at');
-    }
-
-    public function setExpiratedAt($expiratedAt)
-    {
-        return $this->setData('expirated_at', $expiratedAt);
-    }
-
-    public function getExpiratedAt()
-    {
-        return $this->getData('expirated_at');
     }
 
     public function loadByHash($hash)

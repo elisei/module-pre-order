@@ -1,0 +1,69 @@
+Subtotal,Subtotal
+"Grand Total","Grand Total"
+"Shipping & Handling","Shipping & Handling"
+Discount,Discount
+"User Admin","User Admin"
+"Tracking Code","Tracking Code"
+Add,Add
+"Send Email Quote","Send Email Quote"
+"The PreOrder email has been sent.","The PreOrder email has been sent."
+"Error sending PreOrder email. Please try again.","Error sending PreOrder email. Please try again."
+"Pre Orders","Pre Orders"
+"Quote not found.","Quote not found."
+"Error loading PreOrder/Quote: %1","Error loading PreOrder/Quote: %1"
+"Error logging in client: %1","Error logging in client: %1"
+"Error creating new quote: %1","Error creating new quote: %1"
+"Error copying client data: %1","Error copying client data: %1"
+"Error copying cart items: %1","Error copying cart items: %1"
+"Error copying item %1: %2","Error copying item %1: %2"
+"Error copying addresses and delivery method: %1","Error copying addresses and delivery method: %1"
+"Error setting up session and cart: %1","Error setting up session and cart: %1"
+"Quote created with some warnings: %1","Quote created with some warnings: %1"
+"Quote created and loaded successfully.","Quote created and loaded successfully."
+"The pre-order with the ""%1"" ID doesn't exist.","The pre-order with the ""%1"" ID doesn't exist."
+"The pre-order with the hash ""%1"" doesn't exist.","The pre-order with the hash ""%1"" doesn't exist."
+"Customer email is not set","Customer email is not set"
+"Failed to send email: %1","Failed to send email: %1"
+"Email template is not configured","Email template is not configured"
+"Invalid sender data. Please configure store email settings.","Invalid sender data. Please configure store email settings."
+Guest,Guest
+N/A,N/A
+"View in Frontend","View in Frontend"
+Items,Items
+Qty,Qty
+Price,Price
+SKU,SKU
+Tax,Tax
+"Pagamento do seu orçamento","Pagamento do seu orçamento"
+"Thank you for requesting a quote from %store_name.","Thank you for requesting a quote from %store_name."
+"If you would like to proceed with your order, you may contact customer service.","If you would like to proceed with your order, you may contact customer service."
+"If you have questions about your quote, you can email us at <a href=""mailto:%store_email"">%store_email</a>.","If you have questions about your quote, you can email us at <a href=""mailto:%store_email"">%store_email</a>."
+"Pagar em:","Pagar em:"
+"Pagar Agora","Pagar Agora"
+"Billing Info","Billing Info"
+"Shipping Info","Shipping Info"
+"Shipping Method","Shipping Method"
+O2TI,O2TI
+"Pre Order","Pre Order"
+Enabled,Enabled
+"Force Customer Account Creation","Force Customer Account Creation"
+"If enabled, automatically creates customer accounts for guest quotes.","If enabled, automatically creates customer accounts for guest quotes."
+"Disable Referrer Policy","Disable Referrer Policy"
+"If enabled, sets Referrer-Policy to 'no-referrer' for quote operations","If enabled, sets Referrer-Policy to 'no-referrer' for quote operations"
+"Affiliate Tracking","Affiliate Tracking"
+"Email Quote","Email Quote"
+"Quote Email Template","Quote Email Template"
+"Email template chosen based on theme fallback when ""Default"" option is selected.","Email template chosen based on theme fallback when ""Default"" option is selected."
+"Quote Email Template for Guest","Quote Email Template for Guest"
+"Quote Email Sender","Quote Email Sender"
+"Send Quote Email Copy To","Send Quote Email Copy To"
+Comma-separated,Comma-separated
+"Send Quote Email Copy Method","Send Quote Email Copy Method"
+"Add New Pre Order","Add New Pre Order"
+ID,ID
+"Customer ID","Customer ID"
+"Customer Email","Customer Email"
+"Quote ID","Quote ID"
+Hash,Hash
+"Admin User","Admin User"
+"Created At","Created At"

@@ -1,22 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace O2TI\PreOrder\Block\Adapted\Quote\Email\Items;
 
 use Magento\Directory\Model\Currency;
 use Magento\Framework\View\Element\Template\Context;
+use Magento\Sales\Block\Order\Totals;
+use Magento\Store\Model\Store;
 use Magento\Tax\Block\Sales\Order\Tax as MagentoTax;
 use Magento\Tax\Model\Config;
 
+/**
+ * Tax totals modification block
+ */
 class Tax extends MagentoTax
 {
-    /** @var Currency */
+    /**
+     * @var Currency
+     */
     private $currency;
 
     /**
-     * DefaultQuoteItemPrice constructor.
-     *
      * @param Currency $currency
      * @param Context $context
+     * @param Config $taxConfig
      * @param array $data
      */
     public function __construct(
@@ -25,47 +33,68 @@ class Tax extends MagentoTax
         Config $taxConfig,
         array $data = []
     ) {
-        parent::__construct($context, $taxConfig, $data);
         $this->currency = $currency;
+        parent::__construct($context, $taxConfig, $data);
     }
 
     /**
-     * Function: formatPrice
+     * Format price with currency
      *
-     * @param $price
-     *
+     * @param float|string $price
      * @return string
      */
-    public function formatPrice($price)
+    public function formatPrice($price): string
     {
         return $this->currency->format($price);
     }
 
     /**
-     * Initialize all order totals relates with tax
+     * Initialize tax totals
      *
-     * @return \Magento\Tax\Block\Sales\Order\Tax
+     * @return MagentoTax
      */
-    public function initTotals()
+    public function initTotals(): MagentoTax
     {
-        /** @var $parent \Magento\Sales\Block\Adminhtml\Order\Invoice\Totals */
+        /** @var Totals $parent */
         $parent = $this->getParentBlock();
         $this->_order = $parent->getOrder();
         $this->_source = $parent->getSource();
 
         $store = $this->getStore();
-        $allowTax = $this->_source->getShippingAddress()->getTaxAmount() > 0 || $this->_config->displaySalesZeroTax(
-            $store
-        );
-        $grandTotal = (double)$this->_source->getGrandTotal();
-        if (! $grandTotal || $allowTax && ! $this->_config->displaySalesTaxWithGrandTotal($store)) {
+        if ($this->shouldDisplayTax($store)) {
             $this->_addTax();
         }
 
+        $this->initAdditionalTotals();
+
+        return $this;
+    }
+
+    /**
+     * Check if tax should be displayed
+     *
+     * @param Store $store
+     * @return bool
+     */
+    private function shouldDisplayTax(Store $store): bool
+    {
+        $allowTax = $this->_source->getShippingAddress()->getTaxAmount() > 0 
+            || $this->_config->displaySalesZeroTax($store);
+        $grandTotal = (float)$this->_source->getGrandTotal();
+
+        return !$grandTotal || ($allowTax && !$this->_config->displaySalesTaxWithGrandTotal($store));
+    }
+
+    /**
+     * Initialize additional totals (subtotal, shipping, discount, grand total)
+     *
+     * @return void
+     */
+    private function initAdditionalTotals(): void
+    {
         $this->_initSubtotal();
         $this->_initShipping();
         $this->_initDiscount();
         $this->_initGrandTotal();
-        return $this;
     }
 }

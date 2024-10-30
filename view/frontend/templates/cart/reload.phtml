@@ -1,37 +1,11 @@
 <?php
-/** @var \Magento\Framework\View\Element\Template $block */
-/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
-
-$scriptString = <<<SCRIPT
-    require([
-        'Magento_Customer/js/customer-data',
-        'jquery',
-        'Magento_Checkout/js/model/quote'
-    ], function (customerData, $, quote) {
-        var sections = [
-            'cart', 
-            'checkout-data', 
-            'directory-data', 
-            'messages', 
-            'wishlist', 
-            'recently_viewed_product', 
-            'recently_compared_product'
-        ];
-        
-        function reloadCustomerData() {
-            customerData.reload(sections, true).done(function () {
-                var cartData = customerData.get('cart')();
-                quote.shippingMethod(null);
-                
-                var checkoutData = customerData.get('checkout-data')();
-            });
-        }
-
-        setTimeout(function() {
-            reloadCustomerData();
-        }, 1000);
-    });
-SCRIPT;
-
-echo $secureRenderer->renderTag('script', [], $scriptString, false);
+/**
+ * Customer data reload template
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ * @var \Magento\Framework\Escaper $escaper
+ */
 ?>
+<div data-mage-init='{"O2TI_PreOrder_reloadCustomerData": {}}'>
+</div>

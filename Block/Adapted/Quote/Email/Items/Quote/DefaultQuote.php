@@ -1,35 +1,42 @@
 <?php
 
+declare(strict_types=1);
 
 namespace O2TI\PreOrder\Block\Adapted\Quote\Email\Items\Quote;
 
+use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\Template;
+use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
-use function array_merge;
-use function is_array;
-use function sprintf;
 
 /**
- * Class DefaultQuote adapted from \Magento\Sales\Block\Order\Email\Items\Order\DefaultOrder
+ * Default quote item renderer for email
+ *
+ * Adapted from \Magento\Sales\Block\Order\Email\Items\Order\DefaultOrder
  */
-class DefaultQuote extends \Magento\Framework\View\Element\Template
+class DefaultQuote extends Template
 {
     /**
-     * Retrieve current order model instance
+     * Retrieve current quote model instance
      *
-     * @return \Magento\Quote\Model\Quote
+     * @return Quote
      */
-    public function getQuote()
+    public function getQuote(): Quote
     {
         return $this->getItem()->getQuote();
     }
 
     /**
+     * Get all available item options
+     *
      * @return array
      */
-    public function getItemOptions()
+    public function getItemOptions(): array
     {
         $result = [];
-        if ($options = $this->getItem()->getProductOptions()) {
+        $options = $this->getItem()->getProductOptions();
+        
+        if ($options) {
             if (isset($options['options'])) {
                 $result = array_merge($result, $options['options']);
             }
@@ -45,46 +52,42 @@ class DefaultQuote extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * @param string|array $value
+     * Get formatted option value
      *
+     * @param string|array $value
      * @return string
      */
-    public function getValueHtml($value)
+    public function getValueHtml($value): string
     {
         if (is_array($value)) {
             return sprintf(
-                '%d',
-                $value['qty']
-            ) . ' x ' . $this->escapeHtml(
-                $value['title']
-            ) . " " . $this->getItem()->getQuote()->formatPrice(
-                $value['price']
+                '%d x %s %s',
+                $value['qty'],
+                $this->escapeHtml($value['title']),
+                $this->getItem()->getQuote()->formatPrice($value['price'])
             );
-        } else {
-            return $this->escapeHtml($value);
         }
+        
+        return $this->escapeHtml($value);
     }
 
     /**
-     * @param mixed $item
+     * Get item SKU
      *
-     * @return mixed
+     * @param QuoteItem $item
+     * @return string
      */
-    public function getSku($item)
+    public function getSku(QuoteItem $item): string
     {
-        if ($item->getProductOptionByCode('simple_sku')) {
-            return $item->getProductOptionByCode('simple_sku');
-        } else {
-            return $item->getSku();
-        }
+        return $item->getProductOptionByCode('simple_sku') ?: $item->getSku();
     }
 
     /**
      * Return product additional information block
      *
-     * @return \Magento\Framework\View\Element\AbstractBlock
+     * @return AbstractBlock
      */
-    public function getProductAdditionalInformationBlock()
+    public function getProductAdditionalInformationBlock(): AbstractBlock
     {
         return $this->getLayout()->getBlock('additional.product.info');
     }
@@ -93,10 +96,9 @@ class DefaultQuote extends \Magento\Framework\View\Element\Template
      * Get the html for item price
      *
      * @param QuoteItem $item
-     *
      * @return string
      */
-    public function getItemPrice(QuoteItem $item)
+    public function getItemPrice(QuoteItem $item): string
     {
         $block = $this->getLayout()->getBlock('item_price');
         $block->setItem($item);

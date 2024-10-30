@@ -23,6 +23,8 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Class Quote
@@ -31,54 +33,64 @@ use Magento\Framework\App\RequestInterface;
 class Quote extends Action implements CsrfAwareActionInterface
 {
     /**
+     * Configuration path for referrer policy
+     */
+    public const XML_PATH_DISABLE_REFERRER = 'preorder/security/disable_referrer';
+
+    /**
      * @var PageFactory
      */
-    protected PageFactory $resultPageFactory;
+    protected $resultPageFactory;
 
     /**
      * @var QuoteFactory
      */
-    protected QuoteFactory $quoteFactory;
+    protected $quoteFactory;
 
     /**
      * @var CheckoutSession
      */
-    protected CheckoutSession $checkoutSession;
+    protected $checkoutSession;
 
     /**
      * @var CartRepositoryInterface
      */
-    protected CartRepositoryInterface $quoteRepository;
+    protected $quoteRepository;
 
     /**
      * @var Cart
      */
-    protected Cart $cart;
+    protected $cart;
 
     /**
      * @var CustomerSession
      */
-    protected CustomerSession $customerSession;
+    protected $customerSession;
 
     /**
      * @var CustomerRepositoryInterface
      */
-    protected CustomerRepositoryInterface $customerRepository;
+    protected $customerRepository;
 
     /**
      * @var ManagerInterface
      */
-    protected ManagerInterface $eventManager;
+    protected $eventManager;
 
     /**
      * @var PreOrderRepositoryInterface
      */
-    protected PreOrderRepositoryInterface $preOrderRepository;
+    protected $preOrderRepository;
 
     /**
      * @var JsonFactory
      */
-    protected JsonFactory $resultJsonFactory;
+    protected $resultJsonFactory;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
 
     /**
      * @param Context $context
@@ -92,6 +104,7 @@ class Quote extends Action implements CsrfAwareActionInterface
      * @param ManagerInterface $eventManager
      * @param PreOrderRepositoryInterface $preOrderRepository
      * @param JsonFactory $resultJsonFactory
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         Context $context,
@@ -104,7 +117,8 @@ class Quote extends Action implements CsrfAwareActionInterface
         CustomerRepositoryInterface $customerRepository,
         ManagerInterface $eventManager,
         PreOrderRepositoryInterface $preOrderRepository,
-        JsonFactory $resultJsonFactory
+        JsonFactory $resultJsonFactory,
+        ScopeConfigInterface $scopeConfig
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
@@ -117,6 +131,7 @@ class Quote extends Action implements CsrfAwareActionInterface
         $this->eventManager = $eventManager;
         $this->preOrderRepository = $preOrderRepository;
         $this->resultJsonFactory = $resultJsonFactory;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -174,9 +189,11 @@ class Quote extends Action implements CsrfAwareActionInterface
             $this->setupQuoteSession($newQuote, $errorMessages);
 
             $this->handleSuccessMessages($errorMessages);
+            $this->setReferrerPolicy();
             return $this->redirectToCart();
 
         } catch (\Exception $e) {
+            $this->setReferrerPolicy();
             return $this->handleExecutionError($e, $errorMessages);
         }
     }
@@ -197,12 +214,12 @@ class Quote extends Action implements CsrfAwareActionInterface
             $oldQuote = $this->quoteFactory->create()->load($oldQuoteId);
 
             if (!$oldQuote->getId()) {
-                throw new NoSuchEntityException(__('Cotação não encontrada.'));
+                throw new NoSuchEntityException(__('Quote not found.'));
             }
 
             return $oldQuote;
         } catch (\Exception $e) {
-            $errorMessages[] = 'Erro ao carregar PreOrder/Cotação: ' . $e->getMessage();
+            $errorMessages[] = __('Error loading PreOrder/Quote: %1', $e->getMessage());
             throw $e;
         }
     }
@@ -243,7 +260,7 @@ class Quote extends Action implements CsrfAwareActionInterface
                 $this->customerSession->setCustomerDataAsLoggedIn($customer);
             }
         } catch (\Exception $e) {
-            throw new LocalizedException(__('Erro ao realizar login do cliente: %1', $e->getMessage()));
+            throw new LocalizedException(__('Error logging in client: %1', $e->getMessage()));
         }
     }
 
@@ -268,7 +285,7 @@ class Quote extends Action implements CsrfAwareActionInterface
             return $newQuote;
         } catch (\Exception $e) {
             $errorMessages[] = 'Erro ao criar nova quote: ' . $e->getMessage();
-            throw new LocalizedException(__('Erro ao criar nova quote: %1', $e->getMessage()));
+            throw new LocalizedException(__('Error creating new quote: %1', $e->getMessage()));
         }
     }
 
@@ -300,7 +317,6 @@ class Quote extends Action implements CsrfAwareActionInterface
     {
         $newQuote->collectTotals();
         if (!$newQuote->getAllItems()) {
-            // Força recálculo de taxas e totais
             $newQuote->setTriggerRecollect(1);
             $newQuote->collectTotals();
 
@@ -336,7 +352,7 @@ class Quote extends Action implements CsrfAwareActionInterface
                 ->setCustomerNote($oldQuote->getCustomerNote())
                 ->setCustomerNoteNotify($oldQuote->getCustomerNoteNotify());
         } catch (\Exception $e) {
-            throw new LocalizedException(__('Erro ao clonar dados do cliente: %1', $e->getMessage()));
+            throw new LocalizedException(__('Error copying client data: %1', $e->getMessage()));
         }
     }
 
@@ -355,7 +371,7 @@ class Quote extends Action implements CsrfAwareActionInterface
                 $this->cloneQuoteItem($item, $newQuote);
             }
         } catch (\Exception $e) {
-            throw new LocalizedException(__('Erro ao clonar itens do carrinho: %1', $e->getMessage()));
+            throw new LocalizedException(__('Error copying cart items: %1', $e->getMessage()));
         }
     }
 
@@ -384,7 +400,7 @@ class Quote extends Action implements CsrfAwareActionInterface
 
             $newQuote->addItem($newItem);
         } catch (\Exception $e) {
-            throw new LocalizedException(__('Erro ao clonar item %1: %2', $item->getName(), $e->getMessage()));
+            throw new LocalizedException(__('Error copying item %1: %2', $item->getName(), $e->getMessage()));
         }
     }
 
@@ -403,7 +419,7 @@ class Quote extends Action implements CsrfAwareActionInterface
             $this->cloneShippingAddress($oldQuote, $newQuote);
             $this->updateShippingRates($newQuote);
         } catch (\Exception $e) {
-            throw new LocalizedException(__('Erro ao clonar endereços e método de entrega: %1', $e->getMessage()));
+            throw new LocalizedException(__('Error copying addresses and delivery method: %1', $e->getMessage()));
         }
     }
 
@@ -533,8 +549,8 @@ class Quote extends Action implements CsrfAwareActionInterface
             );
 
         } catch (\Exception $e) {
-            $errorMessages[] = 'Erro ao configurar sessão e carrinho: ' . $e->getMessage();
-            throw new LocalizedException(__('Erro ao configurar sessão e carrinho: %1', $e->getMessage()));
+            $errorMessages[] = 'Error setting up session and cart: ' . $e->getMessage();
+            throw new LocalizedException(__('Error setting up session and cart: %1', $e->getMessage()));
         }
     }
 
@@ -548,10 +564,10 @@ class Quote extends Action implements CsrfAwareActionInterface
     {
         if (!empty($errorMessages)) {
             $this->messageManager->addWarningMessage(
-                __('Cotação criada com alguns avisos: %1', implode('; ', $errorMessages))
+                __('Quote created with some warnings: %1', implode('; ', $errorMessages))
             );
         } else {
-            $this->messageManager->addSuccessMessage(__('Cotação criada e carregada com sucesso.'));
+            $this->messageManager->addSuccessMessage(__('Quote created and loaded successfully.'));
         }
     }
 
@@ -576,8 +592,34 @@ class Quote extends Action implements CsrfAwareActionInterface
      *
      * @return ResultInterface
      */
-    protected function redirectToCart(): ResultInterface
+    public function redirectToCart(): ResultInterface
     {
-        return $this->resultRedirectFactory->create()->setPath('checkout/cart');
+        return $this->resultRedirectFactory->create()->setPath('checkout/cart', ['_fragment' => 'pre-order']);
     }
+
+    /**
+     * Check if referrer policy should be disabled
+     *
+     * @return bool
+     */
+    private function shouldDisableReferrer(): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_DISABLE_REFERRER,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Set referrer policy if configured
+     *
+     * @return void
+     */
+    private function setReferrerPolicy(): void
+    {
+        if ($this->shouldDisableReferrer()) {
+            $this->getResponse()->setHeader('Referrer-Policy', 'no-referrer');
+        }
+    }
+
 }

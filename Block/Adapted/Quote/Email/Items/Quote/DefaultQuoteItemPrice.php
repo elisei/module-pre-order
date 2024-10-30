@@ -1,39 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace O2TI\PreOrder\Block\Adapted\Quote\Email\Items\Quote;
 
 use Magento\Directory\Model\Currency;
+use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
- * Class DefaultQuoteItemPrice
+ * Quote item price formatting block for email
  */
-class DefaultQuoteItemPrice extends \Magento\Framework\View\Element\Template
+class DefaultQuoteItemPrice extends Template
 {
-    /** @var Currency */
+    /**
+     * @var Currency
+     */
     private $currency;
 
     /**
-     * DefaultQuoteItemPrice constructor.
-     *
      * @param Currency $currency
      * @param Context $context
      * @param array $data
      */
-    public function __construct(Currency $currency, Context $context, array $data = [])
-    {
-        parent::__construct($context, $data);
+    public function __construct(
+        Currency $currency,
+        Context $context,
+        array $data = []
+    ) {
         $this->currency = $currency;
+        parent::__construct($context, $data);
     }
 
     /**
-     * Function: formatPrice
+     * Format price with currency
      *
-     * @param $price
-     *
+     * @param float|string $price
      * @return string
      */
-    public function formatPrice($price)
+    public function formatPrice($price): string
     {
         return $this->currency->format($price);
     }
