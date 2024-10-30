@@ -100,8 +100,7 @@ class DataProvider extends MageDataProvider
         }
 
         $collection = $this->getCollection();
-        
-        // Apply pagination
+
         $criteria = $this->searchCriteriaBuilder->create();
         $this->applyPagination($criteria);
         
@@ -138,8 +137,7 @@ class DataProvider extends MageDataProvider
     protected function getCollection()
     {
         $collection = $this->collectionFactory->create();
-        
-        // Apply email filters if any
+
         if (!empty($this->emailFilters)) {
             $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
             if (!empty($customerIds)) {
@@ -150,7 +148,6 @@ class DataProvider extends MageDataProvider
             }
         }
 
-        // Apply other filters
         foreach ($this->filterBuilder->getData() as $filter) {
             if ($filter->getField() === 'customer_email') {
                 continue;
@@ -177,15 +174,13 @@ class DataProvider extends MageDataProvider
         foreach ($filters as $filter) {
             $condition = $filter['condition'];
             $value = $filter['value'];
-            
-            // Mapear condições comuns
+
             switch ($condition) {
                 case 'like':
                     $value = "%$value%";
                     break;
                 case 'eq':
                     break;
-                // Adicione mais casos conforme necessário
             }
             
             $customerCollection->addFieldToFilter('email', [$condition => $value]);
