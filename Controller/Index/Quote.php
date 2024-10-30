@@ -621,5 +621,4 @@ class Quote extends Action implements CsrfAwareActionInterface
             $this->getResponse()->setHeader('Referrer-Policy', 'no-referrer');
         }
     }
-
 }
