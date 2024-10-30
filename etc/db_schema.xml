@@ -16,7 +16,7 @@
         <column xsi:type="int" name="customer_id" nullable="true" comment="Customer ID"/>
         <column xsi:type="int" name="quote_id" nullable="true" comment="Quote Id"/>
         <column xsi:type="varchar" name="hash" nullable="false" length="255" comment="Hash to Pay"/>
-        <column xsi:type="varchar" name="admin" nullable="false" length="255" comment="User Admin"/>
+        <column xsi:type="varchar" name="admin" nullable="false" length="255" comment="Admin User"/>
         <column xsi:type="varchar" name="tracking" nullable="false" length="255" comment="Code Tracking"/>
         <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">

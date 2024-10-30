@@ -39,7 +39,7 @@ class AddAffiliate extends AbstractFieldArray
     protected function _prepareToRender()
     {
         $this->addColumn('admin', [
-            'label'    => __('User Admin'),
+            'label'    => __('Admin User'),
             'renderer' => $this->getFieldRenderer(),
             'class' => 'required-entry',
         ]);

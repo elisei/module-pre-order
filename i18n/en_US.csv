@@ -2,7 +2,7 @@ Subtotal,Subtotal
 "Grand Total","Grand Total"
 "Shipping & Handling","Shipping & Handling"
 Discount,Discount
-"User Admin","User Admin"
+"Admin User","Admin User"
 "Tracking Code","Tracking Code"
 Add,Add
 "Send Email Quote","Send Email Quote"
@@ -38,8 +38,8 @@ Tax,Tax
 "Thank you for requesting a quote from %store_name.","Thank you for requesting a quote from %store_name."
 "If you would like to proceed with your order, you may contact customer service.","If you would like to proceed with your order, you may contact customer service."
 "If you have questions about your quote, you can email us at <a href=""mailto:%store_email"">%store_email</a>.","If you have questions about your quote, you can email us at <a href=""mailto:%store_email"">%store_email</a>."
-"Pagar em:","Pagar em:"
-"Pagar Agora","Pagar Agora"
+"Pay In:","Pay In:"
+"Pay Now","Pay Now"
 "Billing Info","Billing Info"
 "Shipping Info","Shipping Info"
 "Shipping Method","Shipping Method"
