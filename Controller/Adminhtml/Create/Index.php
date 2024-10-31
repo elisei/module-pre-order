@@ -139,7 +139,6 @@ class Index extends Action
                 'admin' => $adminData['username'],
                 'tracking' => $adminData['tracking'],
             ];
-            
             $this->savePreOrder($preOrderData);
             $this->quoteSender->send($quote, $hash, $adminData['tracking']);
 

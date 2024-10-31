@@ -41,6 +41,17 @@ class FieldColumn extends Select
     }
 
     /**
+     * Sets name for input element
+     *
+     * @param string $value
+     * @return $this
+     */
+    public function setInputName($value)
+    {
+        return $this->setName($value);
+    }
+
+    /**
      * Set "id" for <select> element.
      *
      * @param string $value
