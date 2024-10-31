@@ -1,34 +1,41 @@
 <?php
-// phpcs:disable Magento2.Templates.ThisInTemplate
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
-/** @var $block \Magento\Sales\Block\Order\Email\Items\DefaultItems */
+/** @var \Magento\Sales\Block\Order\Email\Items\DefaultItems $block */
 
-/** @var $_item \Magento\Quote\Model\Quote\Item */
-$_item = $block->getItem();
-$_order = $_item->getQuote();
+/** @var \Magento\Quote\Model\Quote\Item  $item */
+$item = $block->getItem();
+$order = $item->getQuote();
 ?>
 <tr>
     <td class="item-info<?= ($block->getItemOptions() ? ' has-extra' : '') ?>">
-        <p class="product-name"><?= $block->escapeHtml($_item->getName()) ?></p>
-        <p class="sku"><?= $block->escapeHtml(__('SKU')) ?>: <?= $block->escapeHtml($block->getSku($_item)) ?></p>
+        <p class="product-name"><?= $escaper->escapeHtml($item->getName()) ?></p>
+        <p class="sku"><?= $escaper->escapeHtml(__('SKU')) ?>: <?= $escaper->escapeHtml($block->getSku($item)) ?></p>
         <?php if ($block->getItemOptions()): ?>
             <dl class="item-options">
                 <?php foreach ($block->getItemOptions() as $option): ?>
-                    <dt><strong><em><?= $block->escapeHtml($option['label']) ?></em></strong></dt>
+                    <dt><strong><em><?= $escaper->escapeHtml($option['label']) ?></em></strong></dt>
                     <dd>
-                        <?= /* @noEscape */  nl2br($block->escapeHtml($option['value'])) ?>
+                        <?= /* @noEscape */  nl2br($escaper->escapeHtml($option['value'])) ?>
                     </dd>
                 <?php endforeach; ?>
             </dl>
         <?php endif; ?>
         <?php $addInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
         <?php if ($addInfoBlock): ?>
-            <?= $addInfoBlock->setItem($_item)->toHtml() ?>
+            <?= $addInfoBlock->setItem($item)->toHtml() ?>
         <?php endif; ?>
-        <?= $block->escapeHtml($_item->getDescription()) ?>
+        <?= $escaper->escapeHtml($item->getDescription()) ?>
     </td>
-    <td class="item-qty"><?= (int) $_item->getQty() ?></td>
+    <td class="item-qty"><?= (int) $item->getQty() ?></td>
     <td class="item-price">
-        <?= /* @noEscape */ $block->getItemPrice($_item) ?>
+        <?= /* @noEscape */ $block->getItemPrice($item) ?>
     </td>
 </tr>

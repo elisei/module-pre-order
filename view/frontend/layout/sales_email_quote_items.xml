@@ -1,4 +1,14 @@
 <?xml version="1.0"?>
+<!-- 
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+ -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd" label="Email Order Items List" design_abstraction="custom">
     <body>
         <block class="O2TI\PreOrder\Block\Quote\Email\Items" name="items" template="O2TI_PreOrder::email/items.phtml" cacheable="false">

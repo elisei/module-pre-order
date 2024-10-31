@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -10,16 +18,21 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 
 /**
  * Resource Model for customer quote operations
+ *
+ * @SuppressWarnings(PHPMD.CamelCasePropertyName)
  */
 class CustomerQuoteResource extends AbstractDb
 {
     /**
      * @var string
+     *
      */
     protected $_eventPrefix = 'customer_quote_resource';
 
     /**
      * Initialize table and primary key
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      *
      * @return void
      */

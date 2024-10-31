@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 namespace O2TI\PreOrder\Model;
 
@@ -24,6 +32,8 @@ use Magento\Store\Model\ScopeInterface;
 
 /**
  * Class QuoteSender - Handles email sending for quotes
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class QuoteSender
 {
@@ -100,6 +110,8 @@ class QuoteSender
      * @param StoreManagerInterface $storeManager
      * @param Emulation $emulation
      * @param UrlInterface $frontendUrlBuilder
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         LoggerInterface $logger,
@@ -152,9 +164,9 @@ class QuoteSender
 
             $this->sendMail->send($templateId, $quote, $templateVars, $from, $email);
             $this->sendCopyEmail($templateId, $quote, $templateVars, $from, $storeId);
-        } catch (Exception $e) {
-            $this->logError($e, $quote);
-            throw new MailException(__('Failed to send email: %1', $e->getMessage()));
+        } catch (Exception $exc) {
+            $this->logError($exc, $quote);
+            throw new MailException(__('Failed to send email: %1', $exc->getMessage()));
         }
     }
 
@@ -241,7 +253,6 @@ class QuoteSender
         );
 
         try {
-            $store = $this->storeManager->getStore($quote->getStoreId());
             $data = [
                 '_secure' => true,
                 '_nosid' => true,
@@ -311,8 +322,8 @@ class QuoteSender
 
         try {
             $from = $this->senderResolver->resolve($sender, $storeId);
-        } catch (Exception $e) {
-            $this->logger->error('Failed to resolve sender: ' . $e->getMessage(), [
+        } catch (Exception $exc) {
+            $this->logger->error('Failed to resolve sender: ' . $exc->getMessage(), [
                 'sender' => $sender,
                 'store_id' => $storeId
             ]);
@@ -361,17 +372,17 @@ class QuoteSender
     /**
      * Log error information
      *
-     * @param Exception $e
+     * @param Exception $exc
      * @param Quote $quote
      * @return void
      */
-    private function logError(Exception $e, Quote $quote): void
+    private function logError(Exception $exc, Quote $quote): void
     {
-        $this->logger->error('Error sending quote email: ' . $e->getMessage(), [
+        $this->logger->error('Error sending quote email: ' . $exc->getMessage(), [
             'quote_id' => $quote->getId(),
             'customer_email' => $quote->getCustomerEmail(),
             'store_id' => $quote->getStoreId(),
-            'exception' => $e
+            'exception' => $exc
         ]);
     }
 }

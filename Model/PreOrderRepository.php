@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -55,13 +63,13 @@ class PreOrderRepository implements PreOrderRepositoryInterface
     /**
      * @inheritdoc
      */
-    public function getById($id)
+    public function getById($preOrderId)
     {
         $preOrder = $this->preOrderFactory->create();
-        $this->resourceModel->load($preOrder, $id);
+        $this->resourceModel->load($preOrder, $preOrderId);
         if (!$preOrder->getId()) {
             throw new NoSuchEntityException(
-                __('The pre-order with the "%1" ID doesn\'t exist.', $id)
+                __('The pre-order with the "%1" ID doesn\'t exist.', $preOrderId)
             );
         }
         return $preOrder;
@@ -83,9 +91,9 @@ class PreOrderRepository implements PreOrderRepositoryInterface
     /**
      * @inheritdoc
      */
-    public function deleteById($id)
+    public function deleteById($preOrderId)
     {
-        return $this->delete($this->getById($id));
+        return $this->delete($this->getById($preOrderId));
     }
 
     /**

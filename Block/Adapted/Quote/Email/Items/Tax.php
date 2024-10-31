@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -78,7 +86,7 @@ class Tax extends MagentoTax
      */
     private function shouldDisplayTax(Store $store): bool
     {
-        $allowTax = $this->_source->getShippingAddress()->getTaxAmount() > 0 
+        $allowTax = $this->_source->getShippingAddress()->getTaxAmount() > 0
             || $this->_config->displaySalesZeroTax($store);
         $grandTotal = (float)$this->_source->getGrandTotal();
 

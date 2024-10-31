@@ -1,4 +1,13 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+
 declare(strict_types=1);
 
 namespace O2TI\PreOrder\Ui\Component\Listing;
@@ -11,48 +20,58 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider as MageDataProvider;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use O2TI\PreOrder\Model\ResourceModel\PreOrder\CollectionFactory;
-use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustCollFactory;
 use Magento\Framework\Api\Search\DocumentFactory;
 use Magento\Framework\Api\Search\SearchResultFactory;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\Search\DocumentInterface;
 
+/**
+ * Data Provider for PreOrder Grid
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class DataProvider extends MageDataProvider
 {
+    private const DEFAULT_PAGE_SIZE = 20;
+    private const DEFAULT_PAGE = 1;
+    private const DEFAULT_SORT_FIELD = 'entity_id';
+    private const DEFAULT_SORT_DIRECTION = 'DESC';
+
     /**
      * @var CollectionFactory
      */
-    protected $collectionFactory;
+    private CollectionFactory $preOrders;
 
     /**
      * @var CustomerRepositoryInterface
      */
-    protected $customerRepository;
+    private CustomerRepositoryInterface $customers;
 
     /**
-     * @var CustomerCollectionFactory
+     * @var CustCollFactory
      */
-    protected $customerCollectionFactory;
+    private CustCollFactory $custCollection;
 
     /**
      * @var DocumentFactory
      */
-    protected $documentFactory;
+    private DocumentFactory $documents;
 
     /**
      * @var SearchResultFactory
      */
-    protected $searchResultFactory;
+    private SearchResultFactory $searchResult;
 
     /**
      * @var AttributeValueFactory
      */
-    protected $attributeValueFactory;
+    private AttributeValueFactory $attrValues;
 
     /**
      * @var array
      */
-    protected $emailFilters = [];
+    private array $emailFilters = [];
 
     /**
      * Constructor
@@ -61,32 +80,34 @@ class DataProvider extends MageDataProvider
      * @param string $primaryFieldName
      * @param string $requestFieldName
      * @param ReportingInterface $reporting
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param SearchCriteriaBuilder $searchBuilder
      * @param RequestInterface $request
      * @param FilterBuilder $filterBuilder
-     * @param CollectionFactory $collectionFactory
-     * @param CustomerRepositoryInterface $customerRepository
-     * @param CustomerCollectionFactory $customerCollectionFactory
-     * @param DocumentFactory $documentFactory
-     * @param SearchResultFactory $searchResultFactory
-     * @param AttributeValueFactory $attributeValueFactory
+     * @param CollectionFactory $preOrders
+     * @param CustomerRepositoryInterface $customers
+     * @param CustCollFactory $custCollection
+     * @param DocumentFactory $documents
+     * @param SearchResultFactory $searchResult
+     * @param AttributeValueFactory $attrValues
      * @param array $meta
      * @param array $data
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         $name,
         $primaryFieldName,
         $requestFieldName,
         ReportingInterface $reporting,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        SearchCriteriaBuilder $searchBuilder,
         RequestInterface $request,
         FilterBuilder $filterBuilder,
-        CollectionFactory $collectionFactory,
-        CustomerRepositoryInterface $customerRepository,
-        CustomerCollectionFactory $customerCollectionFactory,
-        DocumentFactory $documentFactory,
-        SearchResultFactory $searchResultFactory,
-        AttributeValueFactory $attributeValueFactory,
+        CollectionFactory $preOrders,
+        CustomerRepositoryInterface $customers,
+        CustCollFactory $custCollection,
+        DocumentFactory $documents,
+        SearchResultFactory $searchResult,
+        AttributeValueFactory $attrValues,
         array $meta = [],
         array $data = []
     ) {
@@ -95,32 +116,47 @@ class DataProvider extends MageDataProvider
             $primaryFieldName,
             $requestFieldName,
             $reporting,
-            $searchCriteriaBuilder,
+            $searchBuilder,
             $request,
             $filterBuilder,
             $meta,
             $data
         );
-        $this->collectionFactory = $collectionFactory;
-        $this->customerRepository = $customerRepository;
-        $this->customerCollectionFactory = $customerCollectionFactory;
-        $this->documentFactory = $documentFactory;
-        $this->searchResultFactory = $searchResultFactory;
-        $this->attributeValueFactory = $attributeValueFactory;
+        $this->preOrders = $preOrders;
+        $this->customers = $customers;
+        $this->custCollection = $custCollection;
+        $this->documents = $documents;
+        $this->searchResult = $searchResult;
+        $this->attrValues = $attrValues;
     }
 
     /**
-     * @inheritDoc
+     * Get search results
+     *
+     * @return \Magento\Framework\Api\Search\SearchResultInterface
      */
     public function getSearchResult()
     {
-        /** @var \Magento\Framework\Api\Search\SearchCriteria $searchCriteria */
-        $searchCriteria = $this->getSearchCriteria();
+        $collection = $this->preOrders->create();
         
-        /** @var \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection */
-        $collection = $this->collectionFactory->create();
+        $this->applyDefaultFilters($collection);
+        $this->applyEmailFilter($collection);
+        $this->applySorting($collection);
+        $this->applyPagination($collection);
         
-        // Aplica os filtros padrão
+        $documents = $this->createSearchDocuments($collection);
+        
+        return $this->createSearchResult($documents, $collection->getSize());
+    }
+
+    /**
+     * Apply default filters to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @return void
+     */
+    private function applyDefaultFilters($collection): void
+    {
         foreach ($this->filterBuilder->getData() as $filter) {
             if ($filter->getField() === 'customer_email') {
                 continue;
@@ -130,75 +166,139 @@ class DataProvider extends MageDataProvider
                 [$filter->getConditionType() => $filter->getValue()]
             );
         }
+    }
 
-        // Aplica filtro de email se existir
-        if (!empty($this->emailFilters)) {
-            $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
-            if (!empty($customerIds)) {
-                $collection->addFieldToFilter('customer_id', ['in' => $customerIds]);
-            } else {
-                $collection->addFieldToFilter('entity_id', ['eq' => 0]);
-            }
+    /**
+     * Apply email filter to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @return void
+     */
+    private function applyEmailFilter($collection): void
+    {
+        if (empty($this->emailFilters)) {
+            return;
         }
 
-        // Aplica ordenação
-        if ($this->request->getParam('sorting')) {
-            $sorting = $this->request->getParam('sorting');
-            if (isset($sorting['field']) && !empty($sorting['field'])) {
-                $direction = $sorting['direction'] ?? 'DESC';
-                $collection->addOrder($sorting['field'], $direction);
-            } else {
-                $collection->addOrder('entity_id', 'DESC');
-            }
-        } else {
-            $collection->addOrder('entity_id', 'DESC');
-        }
+        $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
+        $collection->addFieldToFilter(
+            'customer_id',
+            [empty($customerIds) ? 'eq' : 'in' => empty($customerIds) ? 0 : $customerIds]
+        );
+    }
 
-        // Aplica paginação
-        $pageSize = $this->request->getParam('paging')['pageSize'] ?? 20;
-        $currentPage = $this->request->getParam('paging')['current'] ?? 1;
+    /**
+     * Apply sorting to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @return void
+     */
+    private function applySorting($collection): void
+    {
+        $sorting = $this->request->getParam('sorting', []);
+        $field = $sorting['field'] ?? self::DEFAULT_SORT_FIELD;
+        $direction = $sorting['direction'] ?? self::DEFAULT_SORT_DIRECTION;
         
-        if ($pageSize) {
-            $collection->setPageSize($pageSize);
-        }
-        if ($currentPage) {
-            $collection->setCurPage($currentPage);
-        }
+        $collection->addOrder($field, $direction);
+    }
 
-        // Converte os items para documentos
-        $searchDocuments = [];
+    /**
+     * Apply pagination to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @return void
+     */
+    private function applyPagination($collection): void
+    {
+        $paging = $this->request->getParam('paging', []);
+        $pageSize = $paging['pageSize'] ?? self::DEFAULT_PAGE_SIZE;
+        $currentPage = $paging['current'] ?? self::DEFAULT_PAGE;
+        
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($currentPage);
+    }
+
+    /**
+     * Create search documents from collection items
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @return array
+     */
+    private function createSearchDocuments($collection): array
+    {
+        $documents = [];
         foreach ($collection->getItems() as $item) {
-            $itemData = $item->getData();
-            try {
-                if (!empty($itemData['customer_id'])) {
-                    $customer = $this->customerRepository->getById($itemData['customer_id']);
-                    $itemData['customer_email'] = $customer->getEmail();
-                } else {
-                    $itemData['customer_email'] = __('Guest');
-                }
-            } catch (\Exception $e) {
-                $itemData['customer_email'] = __('N/A');
-            }
+            $itemData = $this->prepareItemData($item);
+            $documents[] = $this->createDocument($itemData);
+        }
+        return $documents;
+    }
 
-            /** @var DocumentInterface $document */
-            $document = $this->documentFactory->create();
-            foreach ($itemData as $key => $value) {
-                $attributeValue = $this->attributeValueFactory->create();
-                $attributeValue->setAttributeCode($key);
-                $attributeValue->setValue($value);
-                $document->setCustomAttribute($key, $attributeValue);
-            }
-            $document->setId($itemData['entity_id']);
-            
-            $searchDocuments[] = $document;
+    /**
+     * Prepare item data with customer email
+     *
+     * @param \Magento\Framework\Model\AbstractModel $item
+     * @return array
+     */
+    private function prepareItemData($item): array
+    {
+        $itemData = $item->getData();
+        $customerId = isset($itemData['customer_id']) ? (int)$itemData['customer_id'] : null;
+        $itemData['customer_email'] = $this->getCustomerEmail($customerId);
+        return $itemData;
+    }
+
+    /**
+     * Get customer email by ID
+     *
+     * @param int|null $customerId
+     * @return string
+     */
+    private function getCustomerEmail(?int $customerId): string
+    {
+        if (empty($customerId)) {
+            return (string)__('Guest');
         }
 
-        // Cria o resultado da pesquisa
-        $searchResult = $this->searchResultFactory->create();
-        $searchResult->setSearchCriteria($searchCriteria);
-        $searchResult->setTotalCount($collection->getSize());
-        $searchResult->setItems($searchDocuments);
+        try {
+            return $this->customers->getById($customerId)->getEmail();
+        } catch (\Exception $e) {
+            return (string)__('N/A');
+        }
+    }
 
+    /**
+     * Create document from item data
+     *
+     * @param array $itemData
+     * @return DocumentInterface
+     */
+    private function createDocument(array $itemData): DocumentInterface
+    {
+        $document = $this->documents->create();
+        foreach ($itemData as $key => $value) {
+            $attribute = $this->attrValues->create();
+            $attribute->setAttributeCode($key);
+            $attribute->setValue($value);
+            $document->setCustomAttribute($key, $attribute);
+        }
+        $document->setId($itemData['entity_id']);
+        return $document;
+    }
+
+    /**
+     * Create search result
+     *
+     * @param array $documents
+     * @param int $totalCount
+     * @return \Magento\Framework\Api\Search\SearchResultInterface
+     */
+    private function createSearchResult(array $documents, int $totalCount)
+    {
+        $searchResult = $this->searchResult->create();
+        $searchResult->setSearchCriteria($this->getSearchCriteria());
+        $searchResult->setTotalCount($totalCount);
+        $searchResult->setItems($documents);
         return $searchResult;
     }
 
@@ -208,32 +308,36 @@ class DataProvider extends MageDataProvider
      * @param array $filters
      * @return array
      */
-    protected function getCustomerIdsByEmail($filters)
+    protected function getCustomerIdsByEmail(array $filters): array
     {
-        $customerCollection = $this->customerCollectionFactory->create();
+        $collection = $this->custCollection->create();
         
         foreach ($filters as $filter) {
-            $condition = $filter['condition'];
-            $value = $filter['value'];
-
-            switch ($condition) {
-                case 'like':
-                    $value = "%$value%";
-                    break;
-                case 'eq':
-                    break;
-            }
-            
-            $customerCollection->addFieldToFilter('email', [$condition => $value]);
+            $value = $this->prepareEmailFilterValue($filter);
+            $collection->addFieldToFilter('email', [$filter['condition'] => $value]);
         }
         
-        return $customerCollection->getAllIds();
+        return $collection->getAllIds();
     }
 
     /**
-     * @inheritDoc
+     * Prepare email filter value
+     *
+     * @param array $filter
+     * @return string
      */
-    public function addFilter(Filter $filter)
+    private function prepareEmailFilterValue(array $filter): string
+    {
+        return $filter['condition'] === 'like' ? "%{$filter['value']}%" : $filter['value'];
+    }
+
+    /**
+     * Add filter
+     *
+     * @param Filter $filter
+     * @return void
+     */
+    public function addFilter(Filter $filter): void
     {
         if ($filter->getField() === 'customer_email') {
             $this->emailFilters[] = [

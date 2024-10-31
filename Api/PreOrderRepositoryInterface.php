@@ -1,4 +1,13 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+
 namespace O2TI\PreOrder\Api;
 
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -19,11 +28,11 @@ interface PreOrderRepositoryInterface
     /**
      * Get pre-order by ID.
      *
-     * @param int $id
+     * @param int $preOrderId
      * @return PreOrder
      * @throws NoSuchEntityException
      */
-    public function getById($id);
+    public function getById($preOrderId);
 
     /**
      * Delete pre-order.
@@ -37,12 +46,12 @@ interface PreOrderRepositoryInterface
     /**
      * Delete pre-order by ID.
      *
-     * @param int $id
+     * @param int $preOrderId
      * @return bool
      * @throws NoSuchEntityException
      * @throws CouldNotDeleteException
      */
-    public function deleteById($id);
+    public function deleteById($preOrderId);
 
     /**
      * Get pre-order by hash.

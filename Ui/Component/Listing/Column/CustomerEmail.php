@@ -1,4 +1,13 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+
 declare(strict_types=1);
 
 namespace O2TI\PreOrder\Ui\Component\Listing\Column;
@@ -47,11 +56,10 @@ class CustomerEmail extends Column
             foreach ($dataSource['data']['items'] as &$item) {
                 $customerId = $item['customer_id'] ?? null;
                 try {
+                    $item[$this->getData('name')] = __('Guest');
                     if ($customerId) {
                         $customer = $this->customerRepository->getById((int)$customerId);
                         $item[$this->getData('name')] = $customer->getEmail();
-                    } else {
-                        $item[$this->getData('name')] = __('Guest');
                     }
                 } catch (\Exception $e) {
                     $item[$this->getData('name')] = __('N/A');

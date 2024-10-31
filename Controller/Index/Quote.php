@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -29,6 +37,8 @@ use Magento\Store\Model\ScopeInterface;
 /**
  * Class Quote
  * Controller for managing pre-order quote operations
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Quote extends Action implements CsrfAwareActionInterface
 {
@@ -105,6 +115,9 @@ class Quote extends Action implements CsrfAwareActionInterface
      * @param PreOrderRepositoryInterface $preOrderRepository
      * @param JsonFactory $resultJsonFactory
      * @param ScopeConfigInterface $scopeConfig
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         Context $context,
@@ -517,11 +530,12 @@ class Quote extends Action implements CsrfAwareActionInterface
             ->setBaseShippingTaxAmount(0);
 
         $shippingAddress->collectShippingRates();
-
-        if ($shippingMethod = $shippingAddress->getShippingMethod()) {
+        
+        $curShippingMethod = $shippingAddress->getShippingMethod();
+        if ($curShippingMethod) {
             $this->configureShippingMethod(
                 $newQuote,
-                $shippingMethod,
+                $curShippingMethod,
                 $shippingAddress->getShippingDescription()
             );
         }
@@ -566,24 +580,25 @@ class Quote extends Action implements CsrfAwareActionInterface
             $this->messageManager->addWarningMessage(
                 __('Quote created with some warnings: %1', implode('; ', $errorMessages))
             );
-        } else {
-            $this->messageManager->addSuccessMessage(__('Quote created and loaded successfully.'));
+            return;
         }
+        
+        $this->messageManager->addSuccessMessage(__('Quote created and loaded successfully.'));
     }
 
     /**
      * Handle execution errors
      *
-     * @param \Exception $e
+     * @param \Exception $exception
      * @param array $errorMessages
      * @return ResultInterface
      */
-    protected function handleExecutionError(\Exception $e, array $errorMessages): ResultInterface
+    protected function handleExecutionError(\Exception $exception, array $errorMessages): ResultInterface
     {
         foreach ($errorMessages as $errorMessage) {
             $this->messageManager->addErrorMessage($errorMessage);
         }
-        $this->messageManager->addErrorMessage($e->getMessage());
+        $this->messageManager->addErrorMessage($exception->getMessage());
         return $this->redirectToCart();
     }
 

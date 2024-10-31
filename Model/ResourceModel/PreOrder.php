@@ -1,4 +1,13 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+
 declare(strict_types=1);
 
 namespace O2TI\PreOrder\Model\ResourceModel;
@@ -11,6 +20,8 @@ class PreOrder extends AbstractDb
 {
     /**
      * Initialize resource model
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
     protected function _construct(): void
     {

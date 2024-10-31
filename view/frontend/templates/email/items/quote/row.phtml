@@ -1,13 +1,16 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
  */
-?>
-<?php
+
 /** @var \Magento\Sales\Block\Order\Email\Items\DefaultItems $block */
 
-$_item = $block->getItem();
+$item = $block->getItem();
 
 ?>
-<?= /* @noEscape */ $block->formatPrice($_item->getRowTotal()) ?>
+<?= /* @noEscape */ $block->formatPrice($item->getRowTotal()) ?>

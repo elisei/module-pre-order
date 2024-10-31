@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
-<!--
+<!-- 
 /**
- * Copyright © O2TI. All rights reserved.
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
  * @author    Bruno Elisei <brunoelisei@o2ti.com>
- * See COPYING.txt for license details.
+ * @license   See LICENSE for license details.
  */
--->
+ -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/system_file.xsd">
     <system>
         <tab id="o2ti" translate="label comment" sortOrder="100">

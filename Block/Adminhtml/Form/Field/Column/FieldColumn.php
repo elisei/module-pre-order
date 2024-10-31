@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 namespace O2TI\PreOrder\Block\Adminhtml\Form\Field\Column;
 
@@ -14,33 +22,22 @@ class FieldColumn extends Select
     /**
      * @var CollectionFactory
      */
-    private $userCollectionFactory;
+    private $userCollectFactory;
 
     /**
      * Constructor
      *
      * @param Context $context
-     * @param CollectionFactory $userCollectionFactory
+     * @param CollectionFactory $userCollectFactory
      * @param array $data
      */
     public function __construct(
         Context $context,
-        CollectionFactory $userCollectionFactory,
+        CollectionFactory $userCollectFactory,
         array $data = []
     ) {
-        $this->userCollectionFactory = $userCollectionFactory;
+        $this->userCollectFactory = $userCollectFactory;
         parent::__construct($context, $data);
-    }
-
-    /**
-     * Sets name for input element
-     *
-     * @param string $value
-     * @return $this
-     */
-    public function setInputName($value)
-    {
-        return $this->setName($value);
     }
 
     /**
@@ -78,7 +75,7 @@ class FieldColumn extends Select
      */
     private function getSourceOptions(): array
     {
-        $userCollection = $this->userCollectionFactory->create();
+        $userCollection = $this->userCollectFactory->create();
         $options = [];
 
         foreach ($userCollection as $user) {

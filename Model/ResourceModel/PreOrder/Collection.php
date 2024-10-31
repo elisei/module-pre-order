@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -10,6 +18,8 @@ use O2TI\PreOrder\Model\ResourceModel\PreOrder as PreOrderResource;
 
 /**
  * PreOrder Collection
+ *
+ * @SuppressWarnings(PHPMD.CamelCasePropertyName)
  */
 class Collection extends AbstractCollection
 {
@@ -22,6 +32,8 @@ class Collection extends AbstractCollection
      * Initialize collection
      *
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
     protected function _construct(): void
     {

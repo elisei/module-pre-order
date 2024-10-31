@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -22,6 +30,8 @@ use Throwable;
 
 /**
  * Controller responsible for creating and sending pre-order emails
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Index extends Action
 {
@@ -81,6 +91,8 @@ class Index extends Action
      * @param Random $mathRandom
      * @param AdminSession $adminSession
      * @param HelperConfig $helperConfig
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         Context $context,
@@ -139,8 +151,8 @@ class Index extends Action
                 'success' => true,
                 'redirect_url' => $this->getUrl('preorder/order/index')
             ]);
-        } catch (Throwable $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
+        } catch (Throwable $exc) {
+            $this->logger->error($exc->getMessage(), ['exception' => $exc]);
             $this->messageManager->addErrorMessage(
                 __('Error sending PreOrder email. Please try again.')
             );

@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -16,7 +24,7 @@ class DefaultQuoteItemPrice extends Template
     /**
      * @var Currency
      */
-    private $currency;
+    protected $currency;
 
     /**
      * @param Currency $currency

@@ -1,14 +1,13 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
  */
 
-/**
- * Sales Order Email order items
- *
- * @author     Magento Core Team <core@magentocommerce.com>
- */
 namespace O2TI\PreOrder\Block\Quote\Email;
 
 use Magento\Framework\App\ObjectManager;

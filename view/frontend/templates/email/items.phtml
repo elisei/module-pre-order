@@ -1,8 +1,16 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 use O2TI\PreOrder\Block\Quote\Email\Items;
 
-/** @var $block \O2TI\PreOrder\Block\Quote\Email\Items */
+/** @var \O2TI\PreOrder\Block\Quote\Email\Items $block */
 ?>
 <?php $quote = $block->getQuote() ?>
 <?php if ($quote): ?>
@@ -11,13 +19,13 @@ use O2TI\PreOrder\Block\Quote\Email\Items;
         <thead>
             <tr>
                 <th class="item-info">
-                    <?= $block->escapeHtml(__('Items')) ?>
+                    <?= $escaper->escapeHtml(__('Items')) ?>
                 </th>
                 <th class="item-qty">
-                    <?= $block->escapeHtml(__('Qty')) ?>
+                    <?= $escaper->escapeHtml(__('Qty')) ?>
                 </th>
                 <th class="item-price">
-                    <?= $block->escapeHtml(__('Price')) ?>
+                    <?= $escaper->escapeHtml(__('Price')) ?>
                 </th>
             </tr>
         </thead>

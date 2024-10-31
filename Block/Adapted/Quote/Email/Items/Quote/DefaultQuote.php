@@ -1,13 +1,23 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
 namespace O2TI\PreOrder\Block\Adapted\Quote\Email\Items\Quote;
 
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\View\Element\Template;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Framework\Exception\RuntimeException;
 
 /**
  * Default quote item renderer for email
@@ -16,6 +26,37 @@ use Magento\Quote\Model\Quote\Item as QuoteItem;
  */
 class DefaultQuote extends Template
 {
+    /**
+     * @var QuoteItem
+     */
+    protected QuoteItem $item;
+
+    /**
+     * Set quote item
+     *
+     * @param QuoteItem $item
+     * @return $this
+     */
+    public function setItem(QuoteItem $item)
+    {
+        $this->item = $item;
+        return $this;
+    }
+
+    /**
+     * Get quote item
+     *
+     * @return QuoteItem
+     * @throws RuntimeException
+     */
+    public function getItem(): QuoteItem
+    {
+        if ($this->item === null) {
+            throw new RuntimeException('Quote item is not set');
+        }
+        return $this->item;
+    }
+
     /**
      * Retrieve current quote model instance
      *
@@ -101,7 +142,10 @@ class DefaultQuote extends Template
     public function getItemPrice(QuoteItem $item): string
     {
         $block = $this->getLayout()->getBlock('item_price');
-        $block->setItem($item);
-        return $block->toHtml();
+        if ($block) {
+            $block->setItem($item);
+            return $block->toHtml();
+        }
+        return '';
     }
 }

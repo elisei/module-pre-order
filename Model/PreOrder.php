@@ -1,11 +1,10 @@
 <?php
 /**
- * O2TI PreOrder Module
+ * O2TI Pre Order.
  *
- * @category  O2TI
- * @package   O2TI_PreOrder
- * @author    Seu Nome <seuemail@exemplo.com>
- * @copyright Copyright (c) 2024 O2TI (http://www.o2ti.com)
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
  * @license   See LICENSE for license details.
  */
 
@@ -25,6 +24,8 @@ class PreOrder extends AbstractModel
 {
     /**
      * Initialize resource model
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      *
      * @return void
      */

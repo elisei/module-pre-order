@@ -1,4 +1,13 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+
 declare(strict_types=1);
 
 namespace O2TI\PreOrder\Block\Adapted\Quote\Email;
@@ -37,6 +46,8 @@ class Totals extends OrderTotals
 
     /**
      * Initialize order totals array
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      *
      * @return $this
      */

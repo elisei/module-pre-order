@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -30,12 +38,12 @@ class SendMail
     /**
      * @var TransportBuilder
      */
-    private TransportBuilder $transportBuilder;
+    private $transportBuilder;
 
     /**
      * @var ScopeConfigInterface
      */
-    private ScopeConfigInterface $scopeConfig;
+    private $scopeConfig;
 
     /**
      * @param TransportBuilder $transportBuilder
@@ -57,7 +65,6 @@ class SendMail
      * @param array $templateVars
      * @param array $from
      * @param string $email
-     * @param bool|string|array $cc
      * @return void
      * @throws LocalizedException
      * @throws MailException
@@ -67,14 +74,13 @@ class SendMail
         Quote $quote,
         array $templateVars,
         array $from,
-        string $email,
-        $cc = false
+        string $email
     ): void {
         if (!$this->isEmailEnabled($quote->getStoreId())) {
             return;
         }
 
-        $this->sendEmail($templateId, $quote, $templateVars, $from, $email, $cc);
+        $this->sendBasicEmail($templateId, $quote, $templateVars, $from, $email);
     }
 
     /**
@@ -101,44 +107,59 @@ class SendMail
         }
 
         $copyEmails = $this->prepareCopyEmails($copyTo);
-        $copyMethod = $this->getCopyMethod($quote->getStoreId());
-
-        if ($copyMethod === 'bcc') {
-            $this->sendEmail(
-                $templateId,
-                $quote,
-                $templateVars,
-                $from,
-                $copyEmails[0],
-                array_slice($copyEmails, 1)
-            );
-        } else {
-            $this->sendSeparateEmails($templateId, $quote, $templateVars, $from, $copyEmails);
+        
+        if ($this->getCopyMethod($quote->getStoreId()) === 'bcc') {
+            $this->sendWithBcc($templateId, $quote, $templateVars, $from, $copyEmails);
+            return;
         }
+        
+        $this->sendSeparateEmails($templateId, $quote, $templateVars, $from, $copyEmails);
     }
 
     /**
-     * Send email
+     * Send basic email without copies
      *
      * @param string $templateId
      * @param Quote $quote
      * @param array $templateVars
      * @param array $from
      * @param string $email
-     * @param bool|string|array $cc
      * @return void
      * @throws LocalizedException
      * @throws MailException
      */
-    private function sendEmail(
+    private function sendBasicEmail(
         string $templateId,
         Quote $quote,
         array $templateVars,
         array $from,
-        string $email,
-        $cc = false
+        string $email
     ): void {
-        $transport = $this->prepareTransport($templateId, $quote, $templateVars, $from, $email, $cc);
+        $transport = $this->prepareBasicTransport($templateId, $quote, $templateVars, $from, $email);
+        $transport->sendMessage();
+    }
+
+    /**
+     * Send email with BCC recipients
+     *
+     * @param string $templateId
+     * @param Quote $quote
+     * @param array $templateVars
+     * @param array $from
+     * @param array $emails
+     * @return void
+     * @throws LocalizedException
+     * @throws MailException
+     */
+    private function sendWithBcc(
+        string $templateId,
+        Quote $quote,
+        array $templateVars,
+        array $from,
+        array $emails
+    ): void {
+        $mainRecipient = array_shift($emails);
+        $transport = $this->prepareTransportWithBcc($templateId, $quote, $templateVars, $from, $mainRecipient, $emails);
         $transport->sendMessage();
     }
 
@@ -158,53 +179,60 @@ class SendMail
     }
 
     /**
-     * Prepare transport for email sending
+     * Prepare basic transport for email sending
      *
      * @param string $templateId
      * @param Quote $quote
      * @param array $templateVars
      * @param array $from
      * @param string $email
-     * @param bool|string|array $cc
      * @return TransportInterface
      */
-    private function prepareTransport(
+    private function prepareBasicTransport(
         string $templateId,
         Quote $quote,
         array $templateVars,
         array $from,
-        string $email,
-        $cc = false
+        string $email
+    ): TransportInterface {
+        return $this->transportBuilder->setTemplateIdentifier($templateId)
+            ->setTemplateOptions(['area' => 'frontend', 'store' => $quote->getStoreId()])
+            ->setTemplateVars($templateVars)
+            ->setFrom($from)
+            ->addTo($email)
+            ->getTransport();
+    }
+
+    /**
+     * Prepare transport with BCC recipients
+     *
+     * @param string $templateId
+     * @param Quote $quote
+     * @param array $templateVars
+     * @param array $from
+     * @param string $mainRecipient
+     * @param array $bccRecipients
+     * @return TransportInterface
+     */
+    private function prepareTransportWithBcc(
+        string $templateId,
+        Quote $quote,
+        array $templateVars,
+        array $from,
+        string $mainRecipient,
+        array $bccRecipients
     ): TransportInterface {
         $transportBuilder = $this->transportBuilder->setTemplateIdentifier($templateId)
             ->setTemplateOptions(['area' => 'frontend', 'store' => $quote->getStoreId()])
             ->setTemplateVars($templateVars)
             ->setFrom($from)
-            ->addTo($email);
+            ->addTo($mainRecipient);
 
-        $this->addCcRecipients($transportBuilder, $cc);
+        foreach ($bccRecipients as $bccEmail) {
+            $transportBuilder->addBcc($bccEmail);
+        }
 
         return $transportBuilder->getTransport();
-    }
-
-    /**
-     * Add CC recipients to transport builder
-     *
-     * @param TransportBuilder $transportBuilder
-     * @param bool|string|array $cc
-     * @return void
-     */
-    private function addCcRecipients(TransportBuilder $transportBuilder, $cc): void
-    {
-        if ($cc) {
-            if (is_array($cc)) {
-                foreach ($cc as $ccEmail) {
-                    $transportBuilder->addBcc($ccEmail);
-                }
-            } else {
-                $transportBuilder->addCc($cc);
-            }
-        }
     }
 
     /**
@@ -253,9 +281,10 @@ class SendMail
         array $emails
     ): void {
         foreach ($emails as $email) {
-            if (!empty($email)) {
-                $this->sendEmail($templateId, $quote, $templateVars, $from, $email);
+            if (empty($email)) {
+                continue;
             }
+            $this->sendBasicEmail($templateId, $quote, $templateVars, $from, $email);
         }
     }
 }

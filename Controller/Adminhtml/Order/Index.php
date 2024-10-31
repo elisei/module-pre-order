@@ -1,4 +1,12 @@
 <?php
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
 
 declare(strict_types=1);
 
@@ -54,6 +62,8 @@ class Index extends Action
 
     /**
      * Check if admin has permissions to visit this page
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      *
      * @return bool
      */
