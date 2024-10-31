@@ -3,10 +3,10 @@
     "description": "O2TI - Admin Create Pre Order",
     "require": {
         "php": "~7.4.0||~8.1.0||~8.2.0||~8.3.0",
-        "magento/framework": "*",
-        "magento/module-customer": "*",
-        "magento/module-sales": "*",
-        "magento/module-email": "*",
+        "magento/framework": "^103.0.0",
+        "magento/module-customer": "^103.0.0",
+        "magento/module-sales": "^103.0.0",
+        "magento/module-email": "^101.1.0",
         "ext-json": "*"
     },
     "type": "magento2-module",
