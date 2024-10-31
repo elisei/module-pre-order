@@ -10,16 +10,23 @@
             <argument name="frontendUrlBuilder" xsi:type="object">Magento\Framework\Url</argument>
         </arguments>
     </type>
-    <type name="O2TI\PreOrder\Ui\Component\Listing\DataProvider">
-        <arguments>
-            <argument name="addFilterStrategies" xsi:type="array">
-                <item name="customer_email" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\AddFilterInterface</item>
-            </argument>
-        </arguments>
-    </type>
     <type name="O2TI\PreOrder\Block\Adminhtml\Form\Field\Column\FieldColumn">
         <arguments>
             <argument name="userCollectionFactory" xsi:type="object">Magento\User\Model\ResourceModel\User\CollectionFactory</argument>
         </arguments>
     </type>
+    <type name="O2TI\PreOrder\Ui\Component\Listing\DataProvider">
+        <arguments>
+            <argument name="documentFactory" xsi:type="object">Magento\Framework\Api\Search\DocumentFactory</argument>
+            <argument name="searchResultFactory" xsi:type="object">Magento\Framework\Api\Search\SearchResultFactory</argument>
+            <argument name="attributeValueFactory" xsi:type="object">Magento\Framework\Api\AttributeValueFactory</argument>
+        </arguments>
+    </type>
+    <virtualType name="O2TI\PreOrder\Model\ResourceModel\PreOrder\Grid\Collection" 
+             type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">pre_order</argument>
+            <argument name="resourceModel" xsi:type="string">O2TI\PreOrder\Model\ResourceModel\PreOrder</argument>
+        </arguments>
+    </virtualType>
 </config>

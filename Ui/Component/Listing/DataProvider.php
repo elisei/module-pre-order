@@ -10,22 +10,24 @@ use Magento\Framework\Api\Search\ReportingInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider as MageDataProvider;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\Api\Search\SearchResultInterface;
 use O2TI\PreOrder\Model\ResourceModel\PreOrder\CollectionFactory;
-use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use Magento\Framework\Api\Search\DocumentFactory;
+use Magento\Framework\Api\Search\SearchResultFactory;
+use Magento\Framework\Api\AttributeValueFactory;
+use Magento\Framework\Api\Search\DocumentInterface;
 
 class DataProvider extends MageDataProvider
 {
     /**
-     * @var CustomerRepositoryInterface
-     */
-    protected $customerRepository;
-
-    /**
      * @var CollectionFactory
      */
     protected $collectionFactory;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
 
     /**
      * @var CustomerCollectionFactory
@@ -33,9 +35,19 @@ class DataProvider extends MageDataProvider
     protected $customerCollectionFactory;
 
     /**
-     * @var array
+     * @var DocumentFactory
      */
-    protected $loadedData;
+    protected $documentFactory;
+
+    /**
+     * @var SearchResultFactory
+     */
+    protected $searchResultFactory;
+
+    /**
+     * @var AttributeValueFactory
+     */
+    protected $attributeValueFactory;
 
     /**
      * @var array
@@ -52,9 +64,12 @@ class DataProvider extends MageDataProvider
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param RequestInterface $request
      * @param FilterBuilder $filterBuilder
-     * @param CustomerRepositoryInterface $customerRepository
      * @param CollectionFactory $collectionFactory
+     * @param CustomerRepositoryInterface $customerRepository
      * @param CustomerCollectionFactory $customerCollectionFactory
+     * @param DocumentFactory $documentFactory
+     * @param SearchResultFactory $searchResultFactory
+     * @param AttributeValueFactory $attributeValueFactory
      * @param array $meta
      * @param array $data
      */
@@ -66,9 +81,12 @@ class DataProvider extends MageDataProvider
         SearchCriteriaBuilder $searchCriteriaBuilder,
         RequestInterface $request,
         FilterBuilder $filterBuilder,
-        CustomerRepositoryInterface $customerRepository,
         CollectionFactory $collectionFactory,
+        CustomerRepositoryInterface $customerRepository,
         CustomerCollectionFactory $customerCollectionFactory,
+        DocumentFactory $documentFactory,
+        SearchResultFactory $searchResultFactory,
+        AttributeValueFactory $attributeValueFactory,
         array $meta = [],
         array $data = []
     ) {
@@ -83,29 +101,73 @@ class DataProvider extends MageDataProvider
             $meta,
             $data
         );
-        $this->customerRepository = $customerRepository;
         $this->collectionFactory = $collectionFactory;
+        $this->customerRepository = $customerRepository;
         $this->customerCollectionFactory = $customerCollectionFactory;
+        $this->documentFactory = $documentFactory;
+        $this->searchResultFactory = $searchResultFactory;
+        $this->attributeValueFactory = $attributeValueFactory;
     }
 
     /**
-     * Get data
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function getData()
+    public function getSearchResult()
     {
-        if (isset($this->loadedData)) {
-            return $this->loadedData;
+        /** @var \Magento\Framework\Api\Search\SearchCriteria $searchCriteria */
+        $searchCriteria = $this->getSearchCriteria();
+        
+        /** @var \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection */
+        $collection = $this->collectionFactory->create();
+        
+        // Aplica os filtros padrão
+        foreach ($this->filterBuilder->getData() as $filter) {
+            if ($filter->getField() === 'customer_email') {
+                continue;
+            }
+            $collection->addFieldToFilter(
+                $filter->getField(),
+                [$filter->getConditionType() => $filter->getValue()]
+            );
         }
 
-        $collection = $this->getCollection();
+        // Aplica filtro de email se existir
+        if (!empty($this->emailFilters)) {
+            $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
+            if (!empty($customerIds)) {
+                $collection->addFieldToFilter('customer_id', ['in' => $customerIds]);
+            } else {
+                $collection->addFieldToFilter('entity_id', ['eq' => 0]);
+            }
+        }
 
-        $criteria = $this->searchCriteriaBuilder->create();
-        $this->applyPagination($criteria);
+        // Aplica ordenação
+        if ($this->request->getParam('sorting')) {
+            $sorting = $this->request->getParam('sorting');
+            if (isset($sorting['field']) && !empty($sorting['field'])) {
+                $direction = $sorting['direction'] ?? 'DESC';
+                $collection->addOrder($sorting['field'], $direction);
+            } else {
+                $collection->addOrder('entity_id', 'DESC');
+            }
+        } else {
+            $collection->addOrder('entity_id', 'DESC');
+        }
+
+        // Aplica paginação
+        $pageSize = $this->request->getParam('paging')['pageSize'] ?? 20;
+        $currentPage = $this->request->getParam('paging')['current'] ?? 1;
         
-        $items = [];
-        foreach ($collection as $item) {
+        if ($pageSize) {
+            $collection->setPageSize($pageSize);
+        }
+        if ($currentPage) {
+            $collection->setCurPage($currentPage);
+        }
+
+        // Converte os items para documentos
+        $searchDocuments = [];
+        foreach ($collection->getItems() as $item) {
             $itemData = $item->getData();
             try {
                 if (!empty($itemData['customer_id'])) {
@@ -117,48 +179,27 @@ class DataProvider extends MageDataProvider
             } catch (\Exception $e) {
                 $itemData['customer_email'] = __('N/A');
             }
+
+            /** @var DocumentInterface $document */
+            $document = $this->documentFactory->create();
+            foreach ($itemData as $key => $value) {
+                $attributeValue = $this->attributeValueFactory->create();
+                $attributeValue->setAttributeCode($key);
+                $attributeValue->setValue($value);
+                $document->setCustomAttribute($key, $attributeValue);
+            }
+            $document->setId($itemData['entity_id']);
             
-            $items[] = $itemData;
-        }
-        
-        $this->loadedData = [
-            'items' => $items,
-            'totalRecords' => $collection->getSize()
-        ];
-        
-        return $this->loadedData;
-    }
-
-    /**
-     * Get collection
-     *
-     * @return \Magento\Framework\Data\Collection
-     */
-    protected function getCollection()
-    {
-        $collection = $this->collectionFactory->create();
-
-        if (!empty($this->emailFilters)) {
-            $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
-            if (!empty($customerIds)) {
-                $collection->addFieldToFilter('customer_id', ['in' => $customerIds]);
-            } else {
-                // Se nenhum cliente for encontrado com o email, força retorno vazio
-                $collection->addFieldToFilter('entity_id', ['eq' => 0]);
-            }
+            $searchDocuments[] = $document;
         }
 
-        foreach ($this->filterBuilder->getData() as $filter) {
-            if ($filter->getField() === 'customer_email') {
-                continue;
-            }
-            $collection->addFieldToFilter(
-                $filter->getField(),
-                [$filter->getConditionType() => $filter->getValue()]
-            );
-        }
-        
-        return $collection;
+        // Cria o resultado da pesquisa
+        $searchResult = $this->searchResultFactory->create();
+        $searchResult->setSearchCriteria($searchCriteria);
+        $searchResult->setTotalCount($collection->getSize());
+        $searchResult->setItems($searchDocuments);
+
+        return $searchResult;
     }
 
     /**
@@ -190,29 +231,7 @@ class DataProvider extends MageDataProvider
     }
 
     /**
-     * Apply pagination to collection
-     *
-     * @param SearchCriteriaInterface $criteria
-     * @return void
-     */
-    protected function applyPagination(SearchCriteriaInterface $criteria)
-    {
-        $paging = $criteria->getPageSize();
-        $curPage = $criteria->getCurrentPage();
-        
-        if ($paging) {
-            $this->getCollection()->setPageSize($paging);
-        }
-        if ($curPage) {
-            $this->getCollection()->setCurPage($curPage);
-        }
-    }
-
-    /**
-     * Add full text filter
-     *
-     * @param Filter $filter
-     * @return void
+     * @inheritDoc
      */
     public function addFilter(Filter $filter)
     {
