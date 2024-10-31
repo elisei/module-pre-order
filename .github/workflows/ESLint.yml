@@ -2,13 +2,19 @@ name: Run ESLint
 on: [push, pull_request]
 
 jobs:
-  build:
+  lint:
     name: Run ESLint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
-      - run: npm install -g eslint
-      - run: eslint
+          node-version: '20'
+          
+      - name: Install ESLint
+        run: npm install -g eslint@8.56.0
+          
+      - name: Run ESLint
+        run: eslint .
