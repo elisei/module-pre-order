@@ -41,32 +41,32 @@ class DataProvider extends MageDataProvider
     /**
      * @var CollectionFactory
      */
-    private CollectionFactory $preOrders;
+    private $preOrders;
 
     /**
      * @var CustomerRepositoryInterface
      */
-    private CustomerRepositoryInterface $customers;
+    private $customers;
 
     /**
      * @var CustCollFactory
      */
-    private CustCollFactory $custCollection;
+    private $custCollection;
 
     /**
      * @var DocumentFactory
      */
-    private DocumentFactory $documents;
+    private $documents;
 
     /**
      * @var SearchResultFactory
      */
-    private SearchResultFactory $searchResult;
+    private $searchResult;
 
     /**
      * @var AttributeValueFactory
      */
-    private AttributeValueFactory $attrValues;
+    private $attrValues;
 
     /**
      * @var array

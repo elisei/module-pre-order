@@ -24,7 +24,7 @@ class FieldColumn extends Select
     /**
      * @var CollectionFactory
      */
-    private CollectionFactory $userCollectFactory;
+    private $userCollectFactory;
 
     /**
      * Constructor

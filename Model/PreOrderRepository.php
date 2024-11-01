@@ -28,12 +28,12 @@ class PreOrderRepository implements PreOrderRepositoryInterface
     /**
      * @var PreOrderFactory
      */
-    private PreOrderFactory $preOrderFactory;
+    private $preOrderFactory;
 
     /**
      * @var ResourceModel
      */
-    private ResourceModel $resourceModel;
+    private $resourceModel;
 
     /**
      * @param PreOrderFactory $preOrderFactory

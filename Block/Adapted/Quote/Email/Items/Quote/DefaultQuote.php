@@ -29,7 +29,7 @@ class DefaultQuote extends Template
     /**
      * @var QuoteItem
      */
-    protected QuoteItem $item;
+    protected $item;
 
     /**
      * Set quote item

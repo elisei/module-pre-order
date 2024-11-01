@@ -186,14 +186,12 @@ class Quote extends Action implements CsrfAwareActionInterface
         $hash = $this->getRequest()->getParam('hash');
         $errorMessages = [];
 
-        // Limpa sessão do checkout
         $this->checkoutSession->clearQuote();
         $this->checkoutSession->clearStorage();
         $this->checkoutSession->restoreQuote();
         
-        // Limpa carrinho
         $this->cart->truncate()->save();
-        
+
         try {
             $oldQuote = $this->loadPreOrderAndQuote($hash, $errorMessages);
             $this->deactivateExistingQuotes($errorMessages);
