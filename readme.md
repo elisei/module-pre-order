@@ -5,7 +5,7 @@ Crie cotações (pré orders) no painel administrativo de sua loja e envie autom
 ## Badges
 [![Magento - Coding Quality](https://github.com/elisei/module-pre-order/actions/workflows/magento-coding-quality.yml/badge.svg)](https://github.com/elisei/module-pre-order/actions/workflows/magento-coding-quality.yml)
 [![Magento - Mess Detector](https://github.com/elisei/module-pre-order/actions/workflows/mess-detector.yml/badge.svg)](https://github.com/elisei/module-pre-order/actions/workflows/mess-detector.yml)
-[![Magento - Php Stam](https://github.com/elisei/module-pre-order/actions/workflows/phpstam.yml/badge.svg)](https://github.com/elisei/module-pre-order/actions/workflows/phpstam.yml)
+[![Magento - Php Stan](https://github.com/elisei/module-pre-order/actions/workflows/phpstan.yml/badge.svg)](https://github.com/elisei/module-pre-order/actions/workflows/phpstan.yml)
 
 ## Recursos
 
