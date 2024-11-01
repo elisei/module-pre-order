@@ -7,7 +7,7 @@ define([
 
     return function () {
         if (window.location.hash === '#pre-order') {
-            var sections = [
+            let sections = [
                     'cart',
                     'checkout-data',
                     'directory-data',
