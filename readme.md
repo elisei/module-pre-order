@@ -10,8 +10,22 @@ Crie cotações (pré orders) no painel administrativo de sua loja e envie autom
 
 ## Recursos
 
+- Gere pedidos no admin
+- Notifique o cliente por email ou copie a url
 - Permite cadastrar o consumidor
-- O consumidor faz login automático
+- Se optar por criar a conta automaticamente o consumidor faz login automático (sem senha)
+- Gere pedidos personalizados com preços especias caso queira
 
 ## Instalação
+
+```ssh
+composer require o2ti/pre-order
+```
+
+Após a instalação pelo Composer, execute os seguintes comandos:
+
+```sh
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+```
 
