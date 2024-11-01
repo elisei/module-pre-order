@@ -15,7 +15,8 @@ define([
                     'wishlist',
                     'recently_viewed_product',
                     'recently_compared_product'
-                ];
+                ],
+                cleanUrl = window.location.href.split('#')[0];
 
             $(() => {
                 $('body').trigger('processStart');
@@ -27,7 +28,6 @@ define([
                                 quote.shippingMethod(null);
 
                                 if (window.history && window.history.replaceState) {
-                                    var cleanUrl = window.location.href.split('#')[0];
                                     window.history.replaceState({}, document.title, cleanUrl);
                                 }
                             } catch (e) {

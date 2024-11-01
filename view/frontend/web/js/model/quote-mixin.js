@@ -11,7 +11,7 @@ define([
                 return false;
             }
 
-            var matchedRegion = regions[address.countryId].filter(function (regionItem) {
+            let matchedRegion = regions[address.countryId].filter(function (regionItem) {
                 return regionItem.id === address.regionId;
             })[0];
 
@@ -26,7 +26,8 @@ define([
 
         quote.setShippingAddress = wrapper.wrap(quote.setShippingAddress, function (original, address) {
             if (address && address.regionId && !address.regionCode) {
-                var regions = customerData.get('directory-data')().regions;
+                let regions = customerData.get('directory-data')().regions;
+
                 updateAddressRegion(address, regions);
             }
             return original(address);
@@ -34,7 +35,8 @@ define([
 
         quote.setBillingAddress = wrapper.wrap(quote.setBillingAddress, function (original, address) {
             if (address && address.regionId && !address.regionCode) {
-                var regions = customerData.get('directory-data')().regions;
+                let regions = customerData.get('directory-data')().regions;
+
                 updateAddressRegion(address, regions);
             }
             return original(address);

@@ -20,9 +20,10 @@ define([
 
             params.set('beePreCloseRequest', true);
             params.set('json', true);
-            
+
             params.each(function (keyValue) {
                 let key = keyValue.key;
+
                 if (key.indexOf('item[') === 0) {
                     params.unset(key);
                 }
