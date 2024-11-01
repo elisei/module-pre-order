@@ -7,6 +7,11 @@
         "magento/module-customer": "^103.0.0",
         "magento/module-sales": "^103.0.0",
         "magento/module-email": "^101.1.0",
+        "magento/module-quote": "^101.2.0",
+        "magento/module-checkout": "^100.4.0",
+        "magento/module-user": "^101.2.0",
+        "magento/module-backend": "^102.0.0",
+        "magento/module-ui": "^101.2.0",
         "ext-json": "*"
     },
     "type": "magento2-module",
@@ -36,10 +41,6 @@
         "phpstan/phpstan-deprecation-rules": "^1.0",
         "phpstan/phpstan-phpunit": "^1.0",
         "phpstan/phpstan-strict-rules": "^1.0"
-    },
-    "scripts": {
-        "post-install-cmd": "vendor/bin/phpcs --config-set installed_paths ../../..,../../phpcompatibility/php-compatibility/PHPCompatibility",
-        "post-update-cmd": "vendor/bin/phpcs --config-set installed_paths ../../..,../../phpcompatibility/php-compatibility/PHPCompatibility"
     },
     "repositories": [
         {

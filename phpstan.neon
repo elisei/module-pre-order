@@ -8,8 +8,42 @@ parameters:
         - setup/*
         - Test/*
         - tests/*
+    
     ignoreErrors:
-        # Add specific error patterns to ignore if needed
+        # Factory related errors
+        - '#Property .+ has unknown class .+Factory as its type#'
+        - '#Parameter .+ of method .+ has invalid type .+Factory#'
+        - '#Call to an undefined method .+Factory::.+\(\)#'
+        
+        # Magento specific deprecations
+        - message: '#Call to deprecated method escapeHtml\(\)#'
+          path: Block/Adapted/Quote/Email/Items/Quote/DefaultQuote.php
+        
+        - message: '#Call to deprecated method setFrom\(\)#'
+          path: Model/QuoteSender/SendMail.php
+        
+        - message: '#Parameter .+ has typehint with deprecated class Magento\\Framework\\Registry#'
+          path: Block/Adapted/Quote/Email/Totals.php
+        
+        - message: '#Class .+ extends deprecated class Magento\\Framework\\App\\Action\\Action#'
+          path: Controller/Index/Quote.php
+        
+        - message: '#Parameter .+ has typehint with deprecated class Magento\\Checkout\\Model\\Cart#'
+          path: Controller/Index/Quote.php
+        
+        - message: '#Call to deprecated method _getResource\(\)#'
+          path: Model/PreOrder.php
+        
+        # Common Magento patterns
+        - '#Casting to (int|string) something that''s already (int|string)#'
+        - '#Only booleans are allowed in (an if condition|a negated boolean)#'
+        - '#Short ternary operator is not allowed#'
+        - '#Construct empty\(\) is not allowed#'
+
     reportUnmatchedIgnoredErrors: false
-    checkGenericClassInNonGenericObjectType: false
-    checkMissingIterableValueType: false
+    treatPhpDocTypesAsCertain: false
+    inferPrivatePropertyTypeFromConstructor: true
+
+includes:
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
