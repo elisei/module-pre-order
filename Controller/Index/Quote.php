@@ -33,6 +33,7 @@ use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Framework\Controller\ResultFactory;
 
 /**
  * Class Quote
@@ -607,9 +608,10 @@ class Quote extends Action implements CsrfAwareActionInterface
      *
      * @return ResultInterface
      */
-    public function redirectToCart(): ResultInterface
+    private function redirectToCart()
     {
-        return $this->resultRedirectFactory->create()->setPath('checkout/cart', ['_fragment' => 'pre-order']);
+        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        return $resultRedirect->setPath('checkout/cart', ['_fragment' => 'pre-order']);
     }
 
     /**

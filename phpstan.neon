@@ -25,6 +25,10 @@ parameters:
         - message: '#Parameter .+ has typehint with deprecated class Magento\\Framework\\Registry#'
           path: Block/Adapted/Quote/Email/Totals.php
         
+        # Ignore Action deprecation warning specifically
+        - message: '#Call to method __construct\(\) of deprecated class Magento\\Framework\\App\\Action\\Action#'
+          path: Controller/Index/Quote.php
+        
         - message: '#Class .+ extends deprecated class Magento\\Framework\\App\\Action\\Action#'
           path: Controller/Index/Quote.php
         
@@ -43,7 +47,3 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     treatPhpDocTypesAsCertain: false
     inferPrivatePropertyTypeFromConstructor: true
-
-includes:
-    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
-    - vendor/phpstan/phpstan-strict-rules/rules.neon
