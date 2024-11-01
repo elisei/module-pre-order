@@ -1,4 +1,4 @@
-name: PHPStan
+name: Magento PHPStan
 on: [push, pull_request]
 
 jobs:
