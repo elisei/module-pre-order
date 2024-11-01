@@ -17,7 +17,6 @@
                 <enabled>1</enabled>
                 <force_create_account>1</force_create_account>
                 <disable_referrer>1</disable_referrer>
-                <affiliate_tracking>[]</affiliate_tracking>
             </general>
             <quote>
                 <enabled>1</enabled>
