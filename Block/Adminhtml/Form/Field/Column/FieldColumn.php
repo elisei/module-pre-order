@@ -8,6 +8,8 @@
  * @license   See LICENSE for license details.
  */
 
+declare(strict_types=1);
+
 namespace O2TI\PreOrder\Block\Adminhtml\Form\Field\Column;
 
 use Magento\Framework\View\Element\Context;
@@ -22,7 +24,7 @@ class FieldColumn extends Select
     /**
      * @var CollectionFactory
      */
-    private $userCollectFactory;
+    private CollectionFactory $userCollectFactory;
 
     /**
      * Constructor
@@ -48,14 +50,13 @@ class FieldColumn extends Select
      */
     public function setInputName($value)
     {
-        return $this->setName($value);
+        return $this->setData('name', $value);
     }
 
     /**
-     * Set "id" for <select> element.
+     * Set "id" for <select> element
      *
      * @param string $value
-     *
      * @return $this
      */
     public function setInputId($value)
@@ -64,13 +65,13 @@ class FieldColumn extends Select
     }
 
     /**
-     * Render block HTML.
+     * Render block HTML
      *
      * @return string
      *
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
-    public function _toHtml(): string
+    protected function _toHtml(): string
     {
         if (!$this->getOptions()) {
             $this->setOptions($this->getSourceOptions());
@@ -80,7 +81,7 @@ class FieldColumn extends Select
     }
 
     /**
-     * Get admin users as options.
+     * Get admin users as options
      *
      * @return array
      */

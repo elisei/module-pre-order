@@ -1,0 +1,15 @@
+parameters:
+    level: 1
+    paths:
+        - .
+    excludePaths:
+        - vendor/*
+        - generated/*
+        - setup/*
+        - Test/*
+        - tests/*
+    ignoreErrors:
+        # Add specific error patterns to ignore if needed
+    reportUnmatchedIgnoredErrors: false
+    checkGenericClassInNonGenericObjectType: false
+    checkMissingIterableValueType: false
