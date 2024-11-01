@@ -10,8 +10,8 @@
 define([
     'jquery',
     'O2TI_PreOrder/js/admin-order-common',
-    'Magento_Ui/js/modal/alert',
-], function ($, adminOrderCommon, alert) {
+    'Magento_Ui/js/modal/alert'
+], function ($, adminOrderCommon) {
     'use strict';
 
     return {
@@ -25,8 +25,9 @@ define([
         },
 
         onSendEmailClicked: function () {
-            let promise = adminOrderCommon.save();
-            let afterSendQuoteEmailPromise = promise.then(this.sendQuoteEmail.bind(this, this.url));
+            let promise = adminOrderCommon.save(),
+                afterSendQuoteEmailPromise = promise.then(this.sendQuoteEmail.bind(this, this.url));
+
             afterSendQuoteEmailPromise.done(this.onEmailSent.bind(this));
             afterSendQuoteEmailPromise.fail(this.onEmailFail.bind(this));
         },

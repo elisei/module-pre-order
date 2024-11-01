@@ -17,15 +17,17 @@ define([
     return function (quote) {
         quote.setShippingAddress = wrapper.wrap(quote.setShippingAddress, function (original, address) {
             if (address && address.regionId && !address.regionCode) {
-                var regions = customerData.get('directory-data')().regions;
+                var regions = customerData.get('directory-data')().regions,
+                    matchedRegion;
+
                 if (regions && regions[address.countryId]) {
-                    var region = regions[address.countryId].filter(function(region) {
-                        return region.id == address.regionId;
+                    matchedRegion = regions[address.countryId].filter(function (regionItem) {
+                        return regionItem.id === address.regionId;
                     })[0];
-                    
-                    if (region) {
-                        address.regionCode = region.code;
-                        address.region = region.name;
+
+                    if (matchedRegion) {
+                        address.regionCode = matchedRegion.code;
+                        address.region = matchedRegion.name;
                     }
                 }
             }
@@ -34,15 +36,17 @@ define([
 
         quote.setBillingAddress = wrapper.wrap(quote.setBillingAddress, function (original, address) {
             if (address && address.regionId && !address.regionCode) {
-                var regions = customerData.get('directory-data')().regions;
+                var regions = customerData.get('directory-data')().regions,
+                    matchedRegion;
+
                 if (regions && regions[address.countryId]) {
-                    var region = regions[address.countryId].filter(function(region) {
-                        return region.id == address.regionId;
+                    matchedRegion = regions[address.countryId].filter(function (regionItem) {
+                        return regionItem.id === address.regionId;
                     })[0];
-                    
-                    if (region) {
-                        address.regionCode = region.code;
-                        address.region = region.name;
+
+                    if (matchedRegion) {
+                        address.regionCode = matchedRegion.code;
+                        address.region = matchedRegion.name;
                     }
                 }
             }

@@ -14,17 +14,18 @@ define([
 ], function (customerData, $, quote) {
     'use strict';
 
-    return function (config, element) {
+    return function () {
         if (window.location.hash === '#pre-order') {
             var sections = [
-                'cart',
-                'checkout-data',
-                'directory-data',
-                'messages',
-                'wishlist',
-                'recently_viewed_product',
-                'recently_compared_product'
-            ];
+                    'cart',
+                    'checkout-data',
+                    'directory-data',
+                    'messages',
+                    'wishlist',
+                    'recently_viewed_product',
+                    'recently_compared_product'
+                ],
+                cleanUrl;
 
             $(() => {
                 $('body').trigger('processStart');
@@ -36,7 +37,7 @@ define([
                                 quote.shippingMethod(null);
 
                                 if (window.history && window.history.replaceState) {
-                                    var cleanUrl = window.location.href.split('#')[0];
+                                    cleanUrl = window.location.href.split('#')[0];
                                     window.history.replaceState({}, document.title, cleanUrl);
                                 }
                             } catch (e) {

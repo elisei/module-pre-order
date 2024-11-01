@@ -9,8 +9,8 @@
 
 define([
     'jquery',
-    'Magento_Sales/order/create/scripts',
-], function($){
+    'Magento_Sales/order/create/scripts'
+], function ($) {
     'use strict';
 
     return {
@@ -26,16 +26,18 @@ define([
 
         save: function () {
             let params = window.order.serializeData('edit_form');
+
             params.set('beePreCloseRequest', true);
             params.set('json', true);
-            params.each(function(keyValue)
-            {
+            
+            params.each(function (keyValue) {
                 let key = keyValue.key;
-                if(key.indexOf('item[') === 0){
+                if (key.indexOf('item[') === 0) {
                     params.unset(key);
                 }
             });
+
             return window.order.loadArea(['message'], true, params);
-        },
+        }
     };
 });
