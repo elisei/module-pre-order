@@ -32,6 +32,7 @@ define([
                                 quote.shippingMethod(null);
 
                                 const customerInfo = customerData.get('customer')();
+
                                 if (customerInfo && customerInfo.firstname) {
                                     customer.setIsLoggedIn(true);
                                 }
