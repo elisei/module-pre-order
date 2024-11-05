@@ -238,6 +238,8 @@ class DataProvider extends MageDataProvider
      *
      * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function applyEmailFilter($collection): void
     {
@@ -326,7 +328,6 @@ class DataProvider extends MageDataProvider
      * @param int|null $customerId
      * @return string
      *
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function getCustomerEmail(?int $customerId): string
     {
