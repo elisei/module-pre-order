@@ -38,6 +38,16 @@ class DataProvider extends MageDataProvider
     private const DEFAULT_PAGE = 1;
     private const DEFAULT_SORT_FIELD = 'entity_id';
     private const DEFAULT_SORT_DIRECTION = 'DESC';
+    
+    /**
+     * @var array
+     */
+    private array $numericFields = ['entity_id', 'customer_id', 'quote_id'];
+
+    /**
+     * @var array
+     */
+    private array $specialFields = ['customer_email', 'customer_id'];
 
     /**
      * @var CollectionFactory
@@ -170,7 +180,7 @@ class DataProvider extends MageDataProvider
     private function applyFilters($collection): void
     {
         foreach ($this->filters as $filter) {
-            if (in_array($filter->getField(), ['customer_email', 'customer_id'])) {
+            if (in_array($filter->getField(), $this->specialFields, true)) {
                 continue;
             }
             $this->addFilterToCollection($collection, $filter);
@@ -209,7 +219,7 @@ class DataProvider extends MageDataProvider
             $value = $filter->getValue();
             
             // Handle special cases for number fields
-            if (in_array($field, ['entity_id', 'customer_id', 'quote_id'])) {
+            if (in_array($field, $this->numericFields, true)) {
                 if ($condition === 'like') {
                     $condition = 'eq';
                     $value = str_replace(['%', '_'], '', $value);
@@ -315,6 +325,8 @@ class DataProvider extends MageDataProvider
      *
      * @param int|null $customerId
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function getCustomerEmail(?int $customerId): string
     {
