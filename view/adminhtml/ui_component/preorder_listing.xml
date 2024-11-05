@@ -19,7 +19,7 @@
     <settings>
         <buttons>
             <button name="add">
-                <url path="sales/order_create"/>
+                <url path="sales/order_create/cancel"/>
                 <class>primary</class>
                 <label translate="true">Add New Pre Order</label>
             </button>

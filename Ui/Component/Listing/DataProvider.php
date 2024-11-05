@@ -25,6 +25,7 @@ use Magento\Framework\Api\Search\DocumentFactory;
 use Magento\Framework\Api\Search\SearchResultFactory;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\Search\DocumentInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Data Provider for PreOrder Grid
@@ -72,6 +73,16 @@ class DataProvider extends MageDataProvider
      * @var array
      */
     private array $emailFilters = [];
+
+    /**
+     * @var array
+     */
+    private array $filters = [];
+
+    /**
+     * @var array
+     */
+    private array $customerFilters = [];
 
     /**
      * Constructor
@@ -139,7 +150,8 @@ class DataProvider extends MageDataProvider
     {
         $collection = $this->preOrders->create();
         
-        $this->applyDefaultFilters($collection);
+        $this->applyFilters($collection);
+        $this->applyCustomerFilters($collection);
         $this->applyEmailFilter($collection);
         $this->applySorting($collection);
         $this->applyPagination($collection);
@@ -150,21 +162,64 @@ class DataProvider extends MageDataProvider
     }
 
     /**
-     * Apply default filters to collection
+     * Apply filters to collection
      *
      * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
      * @return void
      */
-    private function applyDefaultFilters($collection): void
+    private function applyFilters($collection): void
     {
-        foreach ($this->filterBuilder->getData() as $filter) {
-            if ($filter->getField() === 'customer_email') {
+        foreach ($this->filters as $filter) {
+            if (in_array($filter->getField(), ['customer_email', 'customer_id'])) {
                 continue;
             }
-            $collection->addFieldToFilter(
-                $filter->getField(),
-                [$filter->getConditionType() => $filter->getValue()]
-            );
+            $this->addFilterToCollection($collection, $filter);
+        }
+    }
+
+    /**
+     * Apply customer filters to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @return void
+     */
+    private function applyCustomerFilters($collection): void
+    {
+        if (empty($this->customerFilters)) {
+            return;
+        }
+
+        foreach ($this->customerFilters as $filter) {
+            $this->addFilterToCollection($collection, $filter);
+        }
+    }
+
+    /**
+     * Add filter to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @param Filter $filter
+     * @return void
+     */
+    private function addFilterToCollection($collection, Filter $filter): void
+    {
+        try {
+            $field = $filter->getField();
+            $condition = $filter->getConditionType();
+            $value = $filter->getValue();
+            
+            // Handle special cases for number fields
+            if (in_array($field, ['entity_id', 'customer_id', 'quote_id'])) {
+                if ($condition === 'like') {
+                    $condition = 'eq';
+                    $value = str_replace(['%', '_'], '', $value);
+                }
+                $value = (int)$value;
+            }
+
+            $collection->addFieldToFilter($field, [$condition => $value]);
+        } catch (LocalizedException $e) {
+            // Log error or handle exception as needed
         }
     }
 
@@ -181,10 +236,17 @@ class DataProvider extends MageDataProvider
         }
 
         $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
-        $collection->addFieldToFilter(
-            'customer_id',
-            [empty($customerIds) ? 'eq' : 'in' => empty($customerIds) ? 0 : $customerIds]
-        );
+        if (!empty($customerIds)) {
+            $collection->addFieldToFilter(
+                'customer_id',
+                ['in' => $customerIds]
+            );
+        } else {
+            $collection->addFieldToFilter(
+                'customer_id',
+                ['null' => true]
+            );
+        }
     }
 
     /**
@@ -339,14 +401,21 @@ class DataProvider extends MageDataProvider
      */
     public function addFilter(Filter $filter): void
     {
-        if ($filter->getField() === 'customer_email') {
+        $field = $filter->getField();
+        
+        if ($field === 'customer_email') {
             $this->emailFilters[] = [
                 'condition' => $filter->getConditionType(),
                 'value' => $filter->getValue()
             ];
             return;
         }
+
+        if ($field === 'customer_id') {
+            $this->customerFilters[] = $filter;
+            return;
+        }
         
-        parent::addFilter($filter);
+        $this->filters[] = $filter;
     }
 }
