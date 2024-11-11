@@ -160,15 +160,68 @@ class DataProvider extends MageDataProvider
     {
         $collection = $this->preOrders->create();
         
+        // Remove o filtro 'fulltext' se existir
+        $fulltextFilter = null;
+        foreach ($this->filters as $key => $filter) {
+            if ($filter->getField() === 'fulltext') {
+                $fulltextFilter = $filter;
+                unset($this->filters[$key]);
+                break;
+            }
+        }
+        
+        // Aplica os filtros regulares
         $this->applyFilters($collection);
         $this->applyCustomerFilters($collection);
         $this->applyEmailFilter($collection);
+        
+        // Se existir um filtro fulltext, aplica a busca em campos específicos
+        if ($fulltextFilter) {
+            $this->applyFulltextSearch($collection, $fulltextFilter->getValue());
+        }
+        
         $this->applySorting($collection);
         $this->applyPagination($collection);
         
         $documents = $this->createSearchDocuments($collection);
         
-        return $this->createSearchResult($documents, $collection->getSize());
+        $searchResult = $this->searchResult->create();
+        $searchResult->setItems($documents);
+        $searchResult->setTotalCount($collection->getSize());
+        $searchResult->setSearchCriteria($this->getSearchCriteria());
+        
+        return $searchResult;
+    }
+
+    /**
+     * Apply fulltext search to collection
+     *
+     * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
+     * @param string $searchTerm
+     * @return void
+     */
+    private function applyFulltextSearch($collection, $searchTerm): void
+    {
+        $fields = ['entity_id', 'customer_id', 'quote_id', 'sku', 'product_name'];
+        $conditions = [];
+
+        foreach ($fields as $field) {
+            if (in_array($field, $this->numericFields)) {
+                if (is_numeric($searchTerm)) {
+                    $conditions[] = [
+                        $field . ' = ?' => (int)$searchTerm
+                    ];
+                }
+            } else {
+                $conditions[] = [
+                    $field . ' LIKE ?' => '%' . $searchTerm . '%'
+                ];
+            }
+        }
+
+        if (!empty($conditions)) {
+            $collection->addFieldToFilter([], ['or' => $conditions]);
+        }
     }
 
     /**
@@ -218,7 +271,6 @@ class DataProvider extends MageDataProvider
             $condition = $filter->getConditionType();
             $value = $filter->getValue();
             
-            // Handle special cases for number fields
             if (in_array($field, $this->numericFields, true)) {
                 if ($condition === 'like') {
                     $condition = 'eq';
@@ -229,7 +281,7 @@ class DataProvider extends MageDataProvider
 
             $collection->addFieldToFilter($field, [$condition => $value]);
         } catch (LocalizedException $e) {
-            // Log error or handle exception as needed
+            // Log error if needed
         }
     }
 
@@ -238,8 +290,6 @@ class DataProvider extends MageDataProvider
      *
      * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
      * @return void
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function applyEmailFilter($collection): void
     {
@@ -249,15 +299,9 @@ class DataProvider extends MageDataProvider
 
         $customerIds = $this->getCustomerIdsByEmail($this->emailFilters);
         if (!empty($customerIds)) {
-            $collection->addFieldToFilter(
-                'customer_id',
-                ['in' => $customerIds]
-            );
+            $collection->addFieldToFilter('customer_id', ['in' => $customerIds]);
         } else {
-            $collection->addFieldToFilter(
-                'customer_id',
-                ['null' => true]
-            );
+            $collection->addFieldToFilter('customer_id', ['null' => true]);
         }
     }
 
@@ -273,7 +317,7 @@ class DataProvider extends MageDataProvider
         $field = $sorting['field'] ?? self::DEFAULT_SORT_FIELD;
         $direction = $sorting['direction'] ?? self::DEFAULT_SORT_DIRECTION;
         
-        $collection->addOrder($field, $direction);
+        $collection->setOrder($field, $direction);
     }
 
     /**
@@ -285,8 +329,8 @@ class DataProvider extends MageDataProvider
     private function applyPagination($collection): void
     {
         $paging = $this->request->getParam('paging', []);
-        $pageSize = $paging['pageSize'] ?? self::DEFAULT_PAGE_SIZE;
-        $currentPage = $paging['current'] ?? self::DEFAULT_PAGE;
+        $pageSize = (int)($paging['pageSize'] ?? self::DEFAULT_PAGE_SIZE);
+        $currentPage = (int)($paging['current'] ?? self::DEFAULT_PAGE);
         
         $collection->setPageSize($pageSize);
         $collection->setCurPage($currentPage);
@@ -327,7 +371,6 @@ class DataProvider extends MageDataProvider
      *
      * @param int|null $customerId
      * @return string
-     *
      */
     private function getCustomerEmail(?int $customerId): string
     {
@@ -359,22 +402,6 @@ class DataProvider extends MageDataProvider
         }
         $document->setId($itemData['entity_id']);
         return $document;
-    }
-
-    /**
-     * Create search result
-     *
-     * @param array $documents
-     * @param int $totalCount
-     * @return \Magento\Framework\Api\Search\SearchResultInterface
-     */
-    private function createSearchResult(array $documents, int $totalCount)
-    {
-        $searchResult = $this->searchResult->create();
-        $searchResult->setSearchCriteria($this->getSearchCriteria());
-        $searchResult->setTotalCount($totalCount);
-        $searchResult->setItems($documents);
-        return $searchResult;
     }
 
     /**
@@ -415,7 +442,12 @@ class DataProvider extends MageDataProvider
     public function addFilter(Filter $filter): void
     {
         $field = $filter->getField();
-        
+        $field = $filter->getField();
+
+        if ($field === 'fulltext') {
+            return;
+        }
+
         if ($field === 'customer_email') {
             $this->emailFilters[] = [
                 'condition' => $filter->getConditionType(),
