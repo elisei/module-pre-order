@@ -199,6 +199,8 @@ class DataProvider extends MageDataProvider
      * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
      * @param string $searchTerm
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function applyFulltextSearch($collection, $searchTerm): void
     {
@@ -290,6 +292,8 @@ class DataProvider extends MageDataProvider
      *
      * @param \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection $collection
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function applyEmailFilter($collection): void
     {
