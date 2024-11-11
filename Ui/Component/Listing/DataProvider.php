@@ -208,7 +208,7 @@ class DataProvider extends MageDataProvider
         $conditions = [];
 
         foreach ($fields as $field) {
-            if (in_array($field, $this->numericFields)) {
+            if (in_array($field, $this->numericFields, true)) {
                 if (is_numeric($searchTerm)) {
                     $conditions[] = [
                         $field . ' = ?' => (int)$searchTerm
