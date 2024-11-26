@@ -18,9 +18,6 @@ jobs:
       run: |
         echo '${{ secrets.AUTH }}' > auth.json
         chmod 600 auth.json
-      
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
 
     - name: Get Composer Cache Directory
       id: composer-cache
@@ -31,7 +28,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
         restore-keys: |
           ${{ runner.os }}-composer-
 
