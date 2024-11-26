@@ -282,7 +282,8 @@ class DataProvider extends MageDataProvider
             }
 
             $collection->addFieldToFilter($field, [$condition => $value]);
-        } catch (LocalizedException $e) {
+        // phpcs:ignore Magento2.Exceptions.ThrowCatch.EmptyCatch
+        } catch (LocalizedException $exc) {
             // Log error if needed
         }
     }
