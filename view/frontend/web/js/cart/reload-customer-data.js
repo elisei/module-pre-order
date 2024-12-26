@@ -16,7 +16,7 @@ define([
                 'wishlist',
                 'recently_viewed_product',
                 'recently_compared_product',
-                'customer'  // Adiciona a seção customer
+                'customer'
             ],
             cleanUrl = window.location.href.split('#')[0];
 
