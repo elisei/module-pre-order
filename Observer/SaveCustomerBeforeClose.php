@@ -114,11 +114,14 @@ class SaveCustomerBeforeClose implements ObserverInterface
         $quoteSession = $observer->getData('session');
         $store = $quoteSession->getStore();
 
+        $quote = $quoteSession->getQuote();
+        
+        $this->handleCustomerComment($observer, $quote);
+
         if (!$this->isForceCreateAccountEnabled($store->getId())) {
             return;
         }
 
-        $quote = $quoteSession->getQuote();
         if ($quote->getCustomer()->getId()) {
             return;
         }
@@ -132,6 +135,27 @@ class SaveCustomerBeforeClose implements ObserverInterface
         }
 
         $this->createCustomerAccount($quote, $email, $store);
+    }
+
+    /**
+     * Handle customer comment
+     *
+     * @param Observer $observer
+     * @param \Magento\Quote\Model\Quote $quote
+     * @return void
+     */
+    private function handleCustomerComment(Observer $observer, $quote)
+    {
+        /** @var RequestInterface $request */
+        $request = $observer->getData('request_model');
+        if (!$request) {
+            return;
+        }
+
+        $orderData = $request->getParam('order', []);
+        if (isset($orderData['customer_comment'])) {
+            $quote->setCustomerComment($orderData['customer_comment']);
+        }
     }
 
     /**

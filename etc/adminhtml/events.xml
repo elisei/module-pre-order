@@ -13,4 +13,7 @@
     <event name="adminhtml_sales_order_create_process_data_before">
         <observer name="preorder_save_customer" instance="O2TI\PreOrder\Observer\SaveCustomerBeforeClose" />
     </event>
+    <event name="adminhtml_sales_order_create_process_data">
+        <observer name="o2ti_preorder_customer_comment" instance="O2TI\PreOrder\Observer\SaveCustomerCommentToQuote" />
+    </event>
 </config>

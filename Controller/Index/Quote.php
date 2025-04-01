@@ -291,7 +291,7 @@ class Quote extends Action implements CsrfAwareActionInterface
             $this->cloneCustomerData($oldQuote, $newQuote);
             $this->cloneItems($oldQuote, $newQuote);
             $this->cloneAddressesAndShipping($oldQuote, $newQuote);
-            
+
             $this->finalizeNewQuote($newQuote);
             
             return $newQuote;
@@ -363,6 +363,11 @@ class Quote extends Action implements CsrfAwareActionInterface
                 ->setCustomerIsGuest($oldQuote->getCustomerIsGuest())
                 ->setCustomerNote($oldQuote->getCustomerNote())
                 ->setCustomerNoteNotify($oldQuote->getCustomerNoteNotify());
+
+                if ($oldQuote->getCustomerComment()) {
+                    $newQuote->setCustomerComment($oldQuote->getCustomerComment());
+                }
+
         } catch (\Exception $e) {
             throw new LocalizedException(__('Error copying client data: %1', $e->getMessage()));
         }
