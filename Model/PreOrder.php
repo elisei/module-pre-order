@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace O2TI\PreOrder\Model;
 
 use Magento\Framework\Model\AbstractModel;
+use O2TI\PreOrder\Api\Data\PreOrderInterface;
 use O2TI\PreOrder\Model\ResourceModel\PreOrder as ResourceModel;
 
 /**
@@ -20,7 +21,7 @@ use O2TI\PreOrder\Model\ResourceModel\PreOrder as ResourceModel;
  *
  * This class handles pre-order data and operations
  */
-class PreOrder extends AbstractModel
+class PreOrder extends AbstractModel implements PreOrderInterface
 {
     /**
      * Initialize resource model
@@ -35,129 +36,115 @@ class PreOrder extends AbstractModel
     }
 
     /**
-     * Set Customer ID
-     *
-     * @param int|null $customerId
-     * @return $this
+     * @inheritdoc
      */
-    public function setCustomerId($customerId)
+    public function getEntityId()
     {
-        return $this->setData('customer_id', $customerId);
+        return $this->getData(self::ENTITY_ID);
     }
 
     /**
-     * Get Customer ID
-     *
-     * @return int|null
+     * @inheritdoc
+     */
+    public function setEntityId($entityId)
+    {
+        return $this->setData(self::ENTITY_ID, $entityId);
+    }
+
+    /**
+     * @inheritdoc
      */
     public function getCustomerId()
     {
-        return $this->getData('customer_id');
+        return $this->getData(self::CUSTOMER_ID);
     }
 
     /**
-     * Set Quote ID
-     *
-     * @param int|null $quoteId
-     * @return $this
+     * @inheritdoc
      */
-    public function setQuoteId($quoteId)
+    public function setCustomerId($customerId)
     {
-        return $this->setData('quote_id', $quoteId);
+        return $this->setData(self::CUSTOMER_ID, $customerId);
     }
 
     /**
-     * Get Quote ID
-     *
-     * @return int|null
+     * @inheritdoc
      */
     public function getQuoteId()
     {
-        return $this->getData('quote_id');
+        return $this->getData(self::QUOTE_ID);
     }
 
     /**
-     * Set Hash
-     *
-     * @param string $hash
-     * @return $this
+     * @inheritdoc
      */
-    public function setHash($hash)
+    public function setQuoteId($quoteId)
     {
-        return $this->setData('hash', $hash);
+        return $this->setData(self::QUOTE_ID, $quoteId);
     }
 
     /**
-     * Get Hash
-     *
-     * @return string|null
+     * @inheritdoc
      */
     public function getHash()
     {
-        return $this->getData('hash');
+        return $this->getData(self::HASH);
     }
 
     /**
-     * Set Admin
-     *
-     * @param string $admin
-     * @return $this
+     * @inheritdoc
      */
-    public function setAdmin($admin)
+    public function setHash($hash)
     {
-        return $this->setData('admin', $admin);
+        return $this->setData(self::HASH, $hash);
     }
 
     /**
-     * Get Admin
-     *
-     * @return string|null
+     * @inheritdoc
      */
     public function getAdmin()
     {
-        return $this->getData('admin');
+        return $this->getData(self::ADMIN);
     }
 
     /**
-     * Set Tracking
-     *
-     * @param string $tracking
-     * @return $this
+     * @inheritdoc
      */
-    public function setTracking($tracking)
+    public function setAdmin($admin)
     {
-        return $this->setData('tracking', $tracking);
+        return $this->setData(self::ADMIN, $admin);
     }
 
     /**
-     * Get Tracking
-     *
-     * @return string|null
+     * @inheritdoc
      */
     public function getTracking()
     {
-        return $this->getData('tracking');
+        return $this->getData(self::TRACKING);
     }
 
     /**
-     * Set Created At
-     *
-     * @param string $createdAt
-     * @return $this
+     * @inheritdoc
      */
-    public function setCreatedAt($createdAt)
+    public function setTracking($tracking)
     {
-        return $this->setData('created_at', $createdAt);
+        return $this->setData(self::TRACKING, $tracking);
     }
 
     /**
-     * Get Created At
-     *
-     * @return string|null
+     * @inheritdoc
      */
     public function getCreatedAt()
     {
-        return $this->getData('created_at');
+        return $this->getData(self::CREATED_AT);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setCreatedAt($createdAt)
+    {
+        return $this->setData(self::CREATED_AT, $createdAt);
     }
 
     /**

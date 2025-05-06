@@ -11,6 +11,10 @@
  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="O2TI\PreOrder\Api\PreOrderRepositoryInterface" type="O2TI\PreOrder\Model\PreOrderRepository" />
+    <preference for="O2TI\PreOrder\Api\Data\PreOrderInterface" type="O2TI\PreOrder\Model\PreOrder" />
+    <preference for="O2TI\PreOrder\Api\PreOrderManagementInterface" type="O2TI\PreOrder\Model\PreOrderManagement" />
+    <preference for="O2TI\PreOrder\Api\Data\GuestPreOrderInterface" type="O2TI\PreOrder\Model\Data\GuestPreOrder" />
+    <preference for="O2TI\PreOrder\Api\GuestPreOrderManagementInterface" type="O2TI\PreOrder\Model\GuestPreOrderManagement" />
 
     <virtualType name="O2TI\PreOrder\Model\ResourceModel\PreOrder\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>

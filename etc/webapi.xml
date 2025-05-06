@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!-- 
+/**
+ * O2TI Pre Order.
+ *
+ * Copyright © 2024 O2TI. All rights reserved.
+ *
+ * @author    Bruno Elisei <brunoelisei@o2ti.com>
+ * @license   See LICENSE for license details.
+ */
+ -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!-- Create a new pre-order (requires admin access) -->
+    <route url="/V1/preorder" method="POST">
+        <service class="O2TI\PreOrder\Api\PreOrderManagementInterface" method="createPreOrder"/>
+        <resources>
+            <resource ref="O2TI_PreOrder::preorder"/>
+        </resources>
+    </route>
+
+    <!-- Get a pre-order by ID (requires admin access) -->
+    <route url="/V1/preorder/:entityId" method="GET">
+        <service class="O2TI\PreOrder\Api\PreOrderManagementInterface" method="getPreOrderById"/>
+        <resources>
+            <resource ref="O2TI_PreOrder::preorder"/>
+        </resources>
+    </route>
+
+    <!-- Get a pre-order by hash (requires admin access) -->
+    <route url="/V1/preorder/hash/:hash" method="GET">
+        <service class="O2TI\PreOrder\Api\PreOrderManagementInterface" method="getPreOrderByHash"/>
+        <resources>
+            <resource ref="O2TI_PreOrder::preorder"/>
+        </resources>
+    </route>
+
+    <!-- Update an existing pre-order (requires admin access) -->
+    <route url="/V1/preorder/:entityId" method="PUT">
+        <service class="O2TI\PreOrder\Api\PreOrderManagementInterface" method="updatePreOrder"/>
+        <resources>
+            <resource ref="O2TI_PreOrder::preorder"/>
+        </resources>
+    </route>
+
+    <!-- Delete a pre-order by ID (requires admin access) -->
+    <route url="/V1/preorder/:entityId" method="DELETE">
+        <service class="O2TI\PreOrder\Api\PreOrderManagementInterface" method="deletePreOrder"/>
+        <resources>
+            <resource ref="O2TI_PreOrder::preorder"/>
+        </resources>
+    </route>
+    
+    <!-- Guest API endpoints - accessible without authentication -->
+    
+    <!-- Get a pre-order by hash (guest access) -->
+    <route url="/V1/guest-preorder/hash/:hash" method="GET">
+        <service class="O2TI\PreOrder\Api\GuestPreOrderManagementInterface" method="getPreOrderByHash"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    
+    <!-- Get quote information for a pre-order by hash (guest access) -->
+    <route url="/V1/guest-preorder/quote/:hash" method="GET">
+        <service class="O2TI\PreOrder\Api\GuestPreOrderManagementInterface" method="getQuoteByPreOrderHash"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Create a new pre-order as guest (guest access) -->
+    <route url="/V1/guest-preorder" method="POST">
+        <service class="O2TI\PreOrder\Api\GuestPreOrderManagementInterface" method="createGuestPreOrder"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>
